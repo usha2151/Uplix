@@ -88,7 +88,7 @@ const TableData = [
   ];
 
 
-const Card = () => {
+const DashboardAdmin = () => {
   const [openSideBar, setOpenSieBar] = useState(true);
 
   const [isActive, setIsActive] = useState(false);
@@ -277,4 +277,4 @@ const Card = () => {
   );
 };
 
-export default Card;
+export default DashboardAdmin;

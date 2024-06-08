@@ -8,6 +8,7 @@ import AddSignatureForm from "./Component/Pages/Users/AddSignatureForm";
 import Addusers from "./Component/Pages/Users/Addusers";
 import AddEmails from "./Component/Pages/Users/AddEmails";
 import Settings from "./Component/Pages/Users/Settings";
+import DashboardAdmin from "./Component/Pages/Admin/DashboardAdmin";
 
 const App = () => {
 
@@ -35,6 +36,7 @@ const App = () => {
               <Route path="/add-users" element={<Addusers />} />
               <Route path="/add-email" element={<AddEmails />} />
               <Route path="/setting" element={<Settings />} />
+              <Route path="/admin" element={<DashboardAdmin />} />
              
 
             </Routes>

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import DropDowns from "../../Common/DropDowns";
 
 const TableData = [
   // (Same as your data array)
@@ -130,11 +131,16 @@ const TableData = [
   },
 ];
 
+const people = [
+  { name: "All " },
+  { name: "Active" },
+  { name: "Inactive" },
+];
+
 const FestivalList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  // Calculate the current items to display
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = TableData.slice(indexOfFirstItem, indexOfLastItem);
@@ -179,9 +185,13 @@ const FestivalList = () => {
                 />
               </svg>
             </div>
-            <button className="mt-4 px-4 py-2 text-base font-semibold text-white bg-blue rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2">
+            <div className="flex flex-wrap gap-4">
+            <button className="px-4  text-base font-semibold text-white bg-blue rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2">
               Add Festivals
             </button>
+            <DropDowns list={people} />
+            </div>
+          
           </div>
           <div className="w-full overflow-x-scroll md:overflow-auto mt-1">
             <table className="table-auto overflow-scroll md:overflow-auto w-full text-left font-inter border-separate border-spacing-y-1">
@@ -241,8 +251,8 @@ const FestivalList = () => {
                       {data.date}
                     </td>
                     <td className="py-4 px-1 text-sm font-normal text-[#637381] rounded-r-[8px] flex gap-3">
-                      <i className="fa-solid fa-trash"></i>
-                      <i className="fa-solid fa-user-pen"></i>
+                      <i class="fa-regular fa-pen-to-square"></i>
+                      <i class="fa-regular fa-trash-can"></i>
                     </td>
                   </tr>
                 ))}
