@@ -9,7 +9,7 @@ import otpRouter from './routes/emailVerifyRoute.js';
 import UserClientsRouter from './routes/clientListRouter.js';
 import SmtpsetRouter from './routes/smptRouter.js';
 import AddFestivalRouter from './routes/addFestivalRouter.js';
-
+import authRouter from './routes/authRouter.js';
 
 dotenv.config(); 
 
@@ -26,6 +26,8 @@ app.use(cors({
 }));
 
 
+//============ API for user ================
+app.use('/api/auth', authRouter);
 
 //============ API for admin ================
 app.use('/admin', adminRouter);

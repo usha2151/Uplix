@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const navigationList = [
   {
     name: "Dashboard",
-    path:"/",
+    path:"/user",
     pathname:"dashboard",
     svg: (
       <svg

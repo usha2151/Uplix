@@ -1,11 +1,35 @@
-import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { NavLink, Link, useLocation, useNavigate } from "react-router-dom";
 import { IoMdArrowDropdown } from "react-icons/io";
-import { Link } from 'react-router-dom';
+import { serverUrl } from "./serverUrl";
+import { useSelector, useDispatch } from "react-redux";
+import axios from "axios";
+import { setAuth } from "../../redux/actions/action";
 
 const Navbar = () => {
   const [showMenu, setShowMenu] = useState(false);
   const [openSideBar, setOpenSieBar] = useState(true);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const auth = useSelector((state) => state.auth);
+console.log(auth)
+  useEffect(() => {
+    axios.defaults.withCredentials = true;
+    axios
+      .get(`http://localhost:8080/api/auth/checkauth`, { withCredentials: true })
+      .then((res) => {
+        if (res.data.Status === "Success") {
+          const { name, username, email, role, id } = res.data;
+          dispatch(
+            setAuth(true, name, username, email, role, id )
+          );
+        } else {
+          dispatch(setAuth(false, null, "", "", "", ""));
+        }
+      })
+      .catch((err) => console.log("Authentication error:", err));
+  }, [location]);
+
   const changeSideBar = () => {
     setOpenSieBar(!openSideBar);
   };
