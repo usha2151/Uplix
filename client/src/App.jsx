@@ -44,8 +44,8 @@ const MainApp = () => {
             <Route path="/add-email" element={<AddEmails />} />
             <Route path="/setting" element={<Settings />} />
             <Route path="/admin" element={<DashboardAdmin />} />
-            <Route path="/" element={<SignUp />} />
-            <Route path="/login" element={<SignIn />} />
+            <Route path="/login" element={<SignUp />} />
+            <Route path="/" element={<SignIn />} />
           </Routes>
         </div>
       </div>

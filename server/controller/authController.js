@@ -1,5 +1,5 @@
 import db from "../database_Config/db.js";
-import jwt from "jsonwebtoken";
+import jwt from 'jsonwebtoken';
 import nodemailer from "nodemailer";
 import bcrypt from 'bcrypt';
 
@@ -185,86 +185,97 @@ export const verify_email = (req, res) => {
 //===================================== end =====================================
 
 //===============================**************** this is authentication of admin web token ******************================
-export const verifyJwt = (req, res, next) => {
-    const token = req.cookies.token;
-    console.log("Token from cookies:", token);
-    if (!token) {
-      console.log("No token provided.");
-      return res.status(401).json({ Error: "You are not authenticated!" });
-    } else {
-      jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
-        if (err) {
-          console.log("Token verification failed:", err);
-          return res.status(403).json({ Error: "Token is not okay" });
-        } else {
-          console.log("Token decoded successfully:", decoded);
-          req.id = decoded.id;
-          next();
-        }
-      });
-    }
-  };
+
   
-  export const checkauth = (req, res) => {
-    const sql = `SELECT * FROM auth WHERE id_auth = ?;`;
-    console.log("Checking authentication for user ID:", req.id);
-    db.query(sql, [req.id], (err, data) => {
-      if (err) {
-        console.error("Database query error:", err);
-        return res.status(500).json({ Error: "Database error" });
-      }
-      if (data && data.length > 0) {
-        const user = data[0];
-        const limitedData = {
-          Status: "Success",
-          id: req.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-        };
-        console.log("User data retrieved successfully:", limitedData);
-        return res.status(200).json(limitedData);
-      } else {
-        console.log("User not found.");
-        return res.status(404).json({ Error: "User not found" });
-      }
-    });
-  };
-  
-  export const Login = (req, res) => {
+
+
+export const Login = (req, res) => {
     const sqlExistenceCheck = `SELECT * FROM auth WHERE email = ?`;
     db.query(sqlExistenceCheck, [req.body.email], (err, data) => {
       if (err) {
-        console.error("Database query error:", err);
         return res.status(500).json({ Error: "Database error" });
       }
-      if (data && data.length > 0) {
+      if (data.length > 0) {
         const user = data[0];
-        console.log("User found in database:", user);
         bcrypt.compare(req.body.password.toString(), user.password, (err, response) => {
           if (err) {
-            console.error("Password comparison error:", err);
             return res.status(500).json({ Error: "Password comparison error" });
           }
           if (response) {
             const id = user.id_auth;
-            const token = jwt.sign({ id }, process.env.JWT_SECRET_KEY, { expiresIn: '1d' });
-            res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict' });
-            console.log("Login successful. Token generated:", token);
+            const name = user.name;
+            const token = jwt.sign({ id, name }, process.env.JWT_SECRET_KEY, { expiresIn: '1d' });
+            console.log("Generated Token:", token);
+            res.cookie('token', token, { 
+              httpOnly: true, 
+              secure: process.env.NODE_ENV === 'production',
+              sameSite: 'lax'
+            });
+            console.log("Cookie set with token");
+            console.log('Response Headers:', res.getHeaders());
             return res.status(200).json({ Success: "Login successful", token });
           } else {
-            console.log("Password not matched.");
             return res.status(401).json({ Error: "Password not matched!" });
           }
         });
       } else {
-        console.log("No matching email found.");
         return res.status(404).json({ Error: "No matching email found." });
       }
     });
   };
+  
 
 
+
+
+export const verifyJwt = (req, res, next) => {
+  const token = req.cookies.token;
+  console.log("Token from cookies:", token);
+
+  if (!token) {
+    console.log("No token provided.");
+    return res.status(401).json({ Error: "You are not authenticated!" });
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
+    if (err) {
+      console.log("Token verification failed:", err);
+      return res.status(403).json({ Error: "Token is not valid" });
+    } else {
+      console.log("Token decoded successfully:", decoded);
+      req.id = decoded.id;
+      next();
+    }
+  });
+};
+
+  
+
+ export const checkauth = (req, res) => {
+  const sql = `SELECT * FROM auth WHERE id_auth = ?`;
+  console.log("Checking authentication for user ID:", req.id);
+  db.query(sql, [req.id], (err, data) => {
+    if (err) {
+      console.error("Database query error:", err);
+      return res.status(500).json({ Error: "Database error" });
+    }
+    if (data.length > 0) {
+      const user = data[0];
+      const limitedData = {
+        Status: "Success",
+        id: req.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      };
+      console.log("User data retrieved successfully:", limitedData);
+      return res.status(200).json(limitedData);
+    } else {
+      console.log("User not found.");
+      return res.status(404).json({ Error: "User not found" });
+    }
+  });
+};
 
 //===================================== end =====================================
 

@@ -13,6 +13,7 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const auth = useSelector((state) => state.auth);
 console.log(auth)
+
   useEffect(() => {
     axios.defaults.withCredentials = true;
     axios

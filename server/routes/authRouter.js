@@ -1,15 +1,12 @@
-// routes/blogRouter.js
 import express from 'express';
-import { verify_email, checkauth, logout, addUser , Login, verifyJwt} from '../controller/authController.js';
+import { verify_email, logout, addUser, Login, verifyJwt, checkauth} from '../controller/authController.js';
 
 const authRouter = express.Router();
 
-//============ Route for adding a blog ================
-authRouter.post('/login', Login)
-          .get('/checkauth', verifyJwt, checkauth)
-          .get('/logout', logout)
-          .post("/add-user",  addUser)
-          .get('/verify_email/:uId', verify_email);
-          
+authRouter.get('/checkauth', verifyJwt, checkauth);
+authRouter.post('/login', Login);
+authRouter.get('/logout', logout);
+authRouter.post('/add-user', addUser);
+authRouter.get('/verify_email/:uId', verify_email);
 
 export default authRouter;
