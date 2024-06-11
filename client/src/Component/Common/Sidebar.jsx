@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+
 
 const navigationList = [
   {
@@ -226,6 +228,8 @@ const Sidebar = () => {
 
   const [showMenu, setShowMenu] = useState(false);
   const [openSideBar, setOpenSieBar] = useState(true);
+  const dispatch = useDispatch();
+  const auth = useSelector((state) => state.auth);
   const changeSideBar = () => {
     setOpenSieBar(!openSideBar);
   };
@@ -372,10 +376,10 @@ const Sidebar = () => {
                 <div className={`${openSideBar ? "block" : "hidden"}`}>
                   <div className="flex flex-col pr-1">
                     <span className="text-[#637381] text-sm xl:text-base font-medium truncate w-full max-w-20 cursor-pointer">
-                      Dominik Phelps
+                      {auth.name}
                     </span>
                     <span className="text-[#637381] text-xs xl:text-sm font-normal truncate w-full max-w-20 cursor-pointer">
-                      hello@Dominik.com
+                    {auth.email}
                     </span>
                   </div>
                 </div>

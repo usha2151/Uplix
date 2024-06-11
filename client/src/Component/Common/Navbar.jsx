@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { NavLink, Link, useLocation, useNavigate } from "react-router-dom";
-import { IoMdArrowDropdown } from "react-icons/io";
-import { serverUrl } from "./serverUrl";
+import {  useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import { setAuth } from "../../redux/actions/action";
@@ -12,7 +10,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const auth = useSelector((state) => state.auth);
-console.log(auth)
+console.log(auth.name)
 
   useEffect(() => {
     axios.defaults.withCredentials = true;
@@ -20,9 +18,9 @@ console.log(auth)
       .get(`http://localhost:8080/api/auth/checkauth`, { withCredentials: true })
       .then((res) => {
         if (res.data.Status === "Success") {
-          const { name, username, email, role, id } = res.data;
+          const { name, email, role, id } = res.data;
           dispatch(
-            setAuth(true, name, username, email, role, id )
+            setAuth(true,  id ,name, email, role)
           );
         } else {
           dispatch(setAuth(false, null, "", "", "", ""));
@@ -42,7 +40,7 @@ console.log(auth)
     <div className="hidden sm:flex max-w-2xl justify-between w-full">
       <div className="flex flex-col">
         <span className="text-base md:text-xl text-[#212B36] font-semibold">
-          Hello Dominik!
+          Hello {auth.name}!
         </span>
         <span className="text-sm font-normal">
           Welcome back to dashboard.
