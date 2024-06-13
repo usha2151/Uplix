@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import DropDowns from "../../Common/DropDowns";
 import axios from "axios";
 import { useSelector } from "react-redux";
-import Modal from 'react-modal'; // Import Modal from react-modal
+
 
 const cardData = [
   {
@@ -275,7 +275,7 @@ const DashboardUser = () => {
                     ) : (
                       <i className="fa-solid fa-user-pen" onClick={() => handleEditClick(client)}></i>
                     )}
-                    <i className="fa-solid fa-trash" onClick={() => handleDeleteClick(client)}></i>
+                    <i className="fa-solid fa-trash" onClick={() => handleDeleteClick(client.client_id)}></i>
                   </td>
                 </tr>
               ))}
@@ -293,19 +293,21 @@ const DashboardUser = () => {
       </div>
 
       {/* Modal for delete confirmation */}
-      <Modal
-        isOpen={modalIsOpen}
-        onRequestClose={handleCancelDelete}
-        contentLabel="Confirm Delete"
-        className="modal"
-        overlayClassName="overlay"
-      >
-        <h2>Are you sure you want to delete this user?</h2>
-        <div className="flex justify-end gap-2">
-          <button onClick={handleCancelDelete} className="px-4 py-2 bg-gray-200 rounded">Cancel</button>
-          <button onClick={handleConfirmDelete} className="px-4 py-2 bg-red-500 text-white rounded">Delete</button>
+      {modalIsOpen && (
+        <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-dark bg-opacity-50 z-50 p-8">
+          <div className="p-5 rounded-lg relative bg-dimwhite" style={{ width: '70vw', maxWidth: '350px', height: 'auto', padding: '20px' }}>
+    
+
+            {/* Form */}
+            <h2>Are you sure you want to delete this user?</h2>
+        <div className="flex justify-end gap-2 mt-4">
+          <button onClick={handleCancelDelete} className="px-4 py-2 bg-gray rounded">Cancel</button>
+          <button onClick={handleConfirmDelete} className="px-4 py-2 bg-red text-white rounded">Delete</button>
         </div>
-      </Modal>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
