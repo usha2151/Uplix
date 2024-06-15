@@ -3,7 +3,6 @@ import DropDowns from "../../Common/DropDowns";
 import axios from "axios";
 import { useSelector } from "react-redux";
 
-
 const cardData = [
   {
     type: "Clients",
@@ -45,6 +44,7 @@ const DashboardUser = () => {
   const [editedClient, setEditedClient] = useState({});
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [clientToDelete, setClientToDelete] = useState(null);
+  const [editModalIsOpen, setEditModalIsOpen] = useState(false);
 
   const auth = useSelector((state) => state.auth);
   const userid = auth.id;
@@ -54,27 +54,32 @@ const DashboardUser = () => {
       try {
         const response = await axios.get(`http://localhost:8080/userClients/clientsData/${userid}`);
         setUserClients(response.data.clients);
+        console.log(response.data.clients);
       } catch (error) {
-        console.error('Error fetching clients data:', error);
+        console.error("Error fetching clients data:", error);
       }
     };
     fetchData();
   }, [userid]);
 
-  const toggleActive = (id) => {
-    setUserClients((clients) =>
-      clients.map((client) => {
-        if (client.client_id === id) {
-          return { ...client, isActive: !client.isActive };
-        }
-        return client;
-      })
-    );
-  };
+  const toggleActive = async (id) => {
+    try {
+      const updatedClients = userClients.map((client) =>
+        client.client_id === id ? { ...client, isActive: !client.isActive } : client
+      );
+      setUserClients(updatedClients);
 
+      await axios.put(`http://localhost:8080/userClients/updateStatus/${id}`, {
+        isActive: !userClients.find((client) => client.client_id === id).isActive,
+      });
+    } catch (error) {
+      console.error("Error toggling active status:", error);
+    }
+  };
   const handleEditClick = (client) => {
     setEditClientId(client.client_id);
     setEditedClient(client);
+    setEditModalIsOpen(true);
   };
 
   const handleInputChange = (e) => {
@@ -82,11 +87,12 @@ const DashboardUser = () => {
     setEditedClient({ ...editedClient, [name]: value });
   };
 
-  const handleSaveClick = (id) => {
+  const handleSaveClick = () => {
     setUserClients((clients) =>
-      clients.map((client) => (client.client_id === id ? editedClient : client))
+      clients.map((client) => (client.client_id === editClientId ? editedClient : client))
     );
     setEditClientId(null);
+    setEditModalIsOpen(false);
   };
 
   const handleDeleteClick = (client) => {
@@ -106,6 +112,23 @@ const DashboardUser = () => {
     setClientToDelete(null);
   };
 
+  const handleCancelEdit = () => {
+    setEditModalIsOpen(false);
+    setEditClientId(null);
+  };
+
+  const handleSearch = (searchTerm) => {
+    if (!searchTerm.trim()) {
+      setUserClients(userClients); // Reset to original list if search is empty
+      return;
+    }
+    const filteredClients = userClients.filter((client) =>
+      client.first_name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setUserClients(filteredClients);
+  };
+  
+
   // Pagination logic
   const indexOfLastClient = currentPage * clientsPerPage;
   const indexOfFirstClient = indexOfLastClient - clientsPerPage;
@@ -118,7 +141,7 @@ const DashboardUser = () => {
     <div className="w-full py-3 pl-7 pr-5 grid xl:grid-cols-12 lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-5 justify-start">
       {cardData?.map((data, key) => (
         <div
-          className="p-5 xl:col-span-3 bg-white flex flex-col  2xl:max-w-none w-full rounded-xl gap-2 border border-[#E7E7E7] hover:shadow-xl cursor-pointer"
+          className="p-5 xl:col-span-3 bg-white flex flex-col 2xl:max-w-none w-full rounded-xl gap-2 border border-[#E7E7E7] hover:shadow-xl cursor-pointer"
           key={key}
         >
           <div className="flex justify-between">
@@ -135,14 +158,10 @@ const DashboardUser = () => {
         </div>
       ))}
 
-      <div className="p-3 bg-white flex flex-col xl:col-span-12 xl:row-auto lg:row-start-4  rounded-xl border border-[#E7E7E7]">
+      <div className="p-3 bg-white flex flex-col xl:col-span-12 xl:row-auto lg:row-start-4 rounded-xl border border-[#E7E7E7]">
         <div className="flex items-center justify-between flex-wrap gap-1">
           <div className="lg:max-w-sm w-2/5 lg:w-full border focus-within:border-blue-600 rounded-lg border-[#E7E7E7] py-1 px-4 justify-between items-center max-h-12 hidden md:flex">
-            <input
-              type="text"
-              className="outline-none w-9/12"
-              placeholder="Search..."
-            />
+            <input type="text" onChange={(e) => handleSearch(e.target.value)} className="outline-none w-9/12" placeholder="Search..." />
             <svg
               width="15"
               height="15"
@@ -164,6 +183,9 @@ const DashboardUser = () => {
               />
             </svg>
           </div>
+          <div>
+              <button type="button" className="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-full border border-blue  focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">No. of Clients: {userClients.length}</button>
+              </div>
           <DropDowns list={people} />
         </div>
         <div className="w-full overflow-x-scroll md:overflow-auto mt-1">
@@ -182,20 +204,17 @@ const DashboardUser = () => {
                     </label>
                   </div>
                 </th>
-                <th className="py-3 pl-1 text-[#212B36] text-sm font-normal whitespace-nowrap">
-                  Name
-                </th>
-                <th className="py-3 text-[#212B36] text-sm font-normal whitespace-nowrap">
-                  Email
-                </th>
-                <th className="py-3 text-[#212B36] text-sm font-normal whitespace-nowrap">
-                  Email Sent
-                </th>
                 <th className="py-3 px-2.5 text-[#212B36] text-sm font-normal whitespace-nowrap">
-                  Email Opened
+                  S.no
+                </th>
+                <th className="py-3 pl-1 text-[#212B36] text-sm font-normal whitespace-nowrap">
+                  First Name
                 </th>
                 <th className="py-3 text-[#212B36] text-sm font-normal whitespace-nowrap">
-                  Email Replied
+                  Last Name
+                </th>
+                <th className="py-3 text-[#212B36] text-sm font-normal whitespace-nowrap">
+                  Email Id
                 </th>
                 <th className="py-3 text-[#212B36] text-sm font-normal whitespace-nowrap text-center">
                   Status
@@ -206,79 +225,58 @@ const DashboardUser = () => {
               </tr>
             </thead>
             <tbody>
-              {currentClients.map((client) => (
-                <tr
-                  key={client.client_id}
-                  className="drop-shadow-[0_0_10px_rgba(34,46,58,0.02)] bg-[#f6f8fa] hover:shadow-2xl cursor-pointer"
-                >
-                  <td className="py-4 pl-3 text-sm font-normal text-[#637381] rounded-l-lg">
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-                      />
-                    </div>
-                  </td>
-                  <td className="py-2 px-1 text-sm font-normal text-[#637381]">
-                    {editClientId === client.client_id ? (
-                      <input
-                        type="text"
-                        name="first_name"
-                        value={editedClient.first_name}
-                        onChange={handleInputChange}
-                        className="w-full px-2 py-1 border border-gray-300 rounded"
-                      />
-                    ) : (
-                      client.first_name
-                    )}
-                  </td>
-                  <td className="py-2 px-1 text-sm font-normal text-[#637381]">
-                    {editClientId === client.client_id ? (
-                      <input
-                        type="text"
-                        name="email"
-                        value={editedClient.email}
-                        onChange={handleInputChange}
-                        className="w-full px-2 py-1 border border-gray-300 rounded"
-                      />
-                    ) : (
-                      client.email
-                    )}
-                  </td>
-                  <td className="py-2 px-1 text-sm font-normal text-[#637381]">
-                    {client.last_name}
-                  </td>
-                  <td className="py-2 px-2.5 text-sm font-normal text-[#637381]">
-                    {/* {client.emailopened} */}
-                  </td>
-                  <td className="py-2 px-1 text-sm font-normal text-[#637381]">
-                    {/* {client.emailreplied} */}
-                  </td>
-                  <td className="px-6 py-2">
-                    <button
-                      onClick={() => toggleActive(client.client_id)}
-                      className={`relative inline-flex items-center rounded-full border border-gray-300 w-10 h-6 transition-colors focus:outline-none ${client.isActive ? 'bg-green' : 'bg-gray'}`}
-                    >
-                      <span
-                        className={`absolute left-0 inline-block w-5 h-5 bg-white rounded-full shadow-sm transform transition-transform ease-in-out ${client.isActive ? 'translate-x-full' : 'translate-x-0'}`}
-                      ></span>
-                      <span
-                        className={`absolute inset-y-0 left-0 flex items-center justify-center w-8 h-8 rounded-full transition-transform ease-in-out transform ${client.isActive ? 'translate-x-8' : 'translate-x-0'}`}
-                      ></span>
-                    </button>
-                  </td>
-                  <td className="py-4 px-1 text-sm font-normal text-[#637381] rounded-r-[8px] flex gap-3">
-                    {editClientId === client.client_id ? (
-                      <button onClick={() => handleSaveClick(client.client_id)}>
-                        Save
-                      </button>
-                    ) : (
-                      <i className="fa-solid fa-user-pen" onClick={() => handleEditClick(client)}></i>
-                    )}
-                    <i className="fa-solid fa-trash" onClick={() => handleDeleteClick(client.client_id)}></i>
-                  </td>
-                </tr>
-              ))}
+            {currentClients.length === 0 ? (
+    <tr>
+      <td colSpan="7" className="text-center py-4 text-sm text-gray-500">
+        No records found.
+      </td>
+    </tr>
+  ) : (
+    currentClients.map((client, index) => (
+      <tr
+        key={client.client_id}
+        className="drop-shadow-[0_0_10px_rgba(34,46,58,0.02)] bg-[#f6f8fa] hover:shadow-2xl cursor-pointer"
+      >
+        <td className="py-4 pl-3 text-sm font-normal text-[#637381] rounded-l-lg">
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+            />
+          </div>
+        </td>
+        <td className="py-2 px-2.5 text-sm font-normal text-[#637381]">{index + 1}</td>
+        <td className="py-2 pl-1 text-sm font-normal text-[#637381]">
+          {client.first_name}
+        </td>
+        <td className="py-2 text-sm font-normal text-[#637381]">{client.last_name}</td>
+        <td className="py-2 text-sm font-normal text-[#637381]">{client.email}</td>
+        <td className="py-2 text-sm font-normal text-[#637381] text-center">
+          <button
+            onClick={() => toggleActive(client.client_id)}
+            className={`relative inline-flex items-center rounded-full border border-gray-300 w-10 h-6 transition-colors focus:outline-none ${
+              client.status == 1 ? "bg-green" : "bg-gray"
+            }`}
+          >
+            <span
+              className={`absolute left-0 inline-block w-5 h-5 bg-white rounded-full shadow-sm transform transition-transform ease-in-out ${
+                client.status == 1 ? "translate-x-full" : "translate-x-0"
+              }`}
+            ></span>
+            <span
+              className={`absolute inset-y-0 left-0 flex items-center justify-center w-8 h-8 rounded-full transition-transform ease-in-out transform ${
+                client.status == 1 ? "translate-x-8" : "translate-x-0"
+              }`}
+            ></span>
+          </button>
+        </td>
+        <td className="py-4 pl-1 text-sm font-normal text-[#637381] rounded-r-[8px] flex gap-3">
+          <i className="fa-solid fa-user-pen" onClick={() => handleEditClick(client)}></i>
+          <i className="fa-solid fa-trash" onClick={() => handleDeleteClick(client)}></i>
+        </td>
+      </tr>
+    ))
+            )}
             </tbody>
           </table>
         </div>
@@ -295,19 +293,68 @@ const DashboardUser = () => {
       {/* Modal for delete confirmation */}
       {modalIsOpen && (
         <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-dark bg-opacity-50 z-50 p-8">
-          <div className="p-5 rounded-lg relative bg-dimwhite" style={{ width: '70vw', maxWidth: '350px', height: 'auto', padding: '20px' }}>
-    
-
-            {/* Form */}
+          <div
+            className="p-5 rounded-lg relative bg-dimwhite"
+            style={{ width: "70vw", maxWidth: "350px", height: "auto", padding: "20px" }}
+          >
             <h2>Are you sure you want to delete this user?</h2>
-        <div className="flex justify-end gap-2 mt-4">
-          <button onClick={handleCancelDelete} className="px-4 py-2 bg-gray rounded">Cancel</button>
-          <button onClick={handleConfirmDelete} className="px-4 py-2 bg-red text-white rounded">Delete</button>
-        </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <button onClick={handleCancelDelete} className="px-4 py-2 bg-gray rounded">
+                Cancel
+              </button>
+              <button onClick={handleConfirmDelete} className="px-4 py-2 bg-red text-white rounded">
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}
 
+      {/* Modal for edit user details */}
+      {editModalIsOpen && (
+        <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-dark bg-opacity-50 z-50 p-8">
+          <div
+            className="p-5 rounded-lg relative bg-dimwhite"
+            style={{ width: "70vw", maxWidth: "350px", height: "auto", padding: "20px" }}
+          >
+            <h2>Edit User Details</h2>
+            <div className="flex flex-col gap-3 mt-4">
+              <input
+                type="text"
+                name="first_name"
+                value={editedClient.first_name}
+                onChange={handleInputChange}
+                placeholder="First Name"
+                className="w-full px-2 py-1 border border-gray-300 rounded"
+              />
+              <input
+                type="text"
+                name="last_name"
+                value={editedClient.last_name}
+                onChange={handleInputChange}
+                placeholder="Last Name"
+                className="w-full px-2 py-1 border border-gray-300 rounded"
+              />
+              <input
+                type="email"
+                name="email"
+                value={editedClient.email}
+                onChange={handleInputChange}
+                placeholder="Email"
+                className="w-full px-2 py-1 border border-gray-300 rounded"
+              />
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <button onClick={handleCancelEdit} className="px-4 py-2 bg-gray rounded">
+                Cancel
+              </button>
+              <button onClick={handleSaveClick} className="px-4 py-2 bg-blue text-white rounded">
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

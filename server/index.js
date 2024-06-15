@@ -11,6 +11,7 @@ import SmtpsetRouter from './routes/smptRouter.js';
 import AddFestivalRouter from './routes/addFestivalRouter.js';
 import authRouter from './routes/authRouter.js';
 import addSignature from './routes/addSignature.js';
+import userList from './routes/userListRouter.js';
 
 dotenv.config();
 
@@ -35,6 +36,7 @@ app.use('/userClients', UserClientsRouter);
 app.use('/SMTP', SmtpsetRouter);
 app.use('/festivals', AddFestivalRouter);
 app.use('/signature', addSignature);
+app.use('/users', userList);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

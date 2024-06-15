@@ -1,37 +1,38 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { Listbox, Transition } from "@headlessui/react";
 import DropDowns from "../../Common/DropDowns";
+import axios from 'axios';
 
-const cardData = [
-    {
-      type: "Clients",
-      percentage: "50.43%",
-      arrow: "https://www.tailwindtap.com/assets/admin/dashboard/uparrow.svg",
-      graph: "https://www.tailwindtap.com/assets/admin/dashboard/graph1.svg",
-      price: "329",
-    },
-    {
-      type: "Email Sents",
-      percentage: "12.32%",
-      arrow: "https://www.tailwindtap.com/assets/admin/dashboard/uparrow.svg",
-      graph: "https://www.tailwindtap.com/assets/admin/dashboard/graph1.svg",
-      price: "200",
-    },
-    {
-      type: "Email Opened",
-      percentage: "10.89%",
-      arrow: "https://www.tailwindtap.com/assets/admin/dashboard/uparrow.svg",
-      graph: "https://www.tailwindtap.com/assets/admin/dashboard/graph1.svg",
-      price: "150",
-    },
-    {
-      type: "Email Replied",
-      percentage: "20.92%",
-      arrow: "https://www.tailwindtap.com/assets/admin/dashboard/downarrow.svg",
-      graph: "https://www.tailwindtap.com/assets/admin/dashboard/graph3.svg",
-      price: "100",
-    },
-  ];
+// const cardData = [
+//     {
+//       type: "Clients",
+//       percentage: "50.43%",
+//       arrow: "https://www.tailwindtap.com/assets/admin/dashboard/uparrow.svg",
+//       graph: "https://www.tailwindtap.com/assets/admin/dashboard/graph1.svg",
+//       price: "329",
+//     },
+//     {
+//       type: "Email Sents",
+//       percentage: "12.32%",
+//       arrow: "https://www.tailwindtap.com/assets/admin/dashboard/uparrow.svg",
+//       graph: "https://www.tailwindtap.com/assets/admin/dashboard/graph1.svg",
+//       price: "200",
+//     },
+//     {
+//       type: "Email Opened",
+//       percentage: "10.89%",
+//       arrow: "https://www.tailwindtap.com/assets/admin/dashboard/uparrow.svg",
+//       graph: "https://www.tailwindtap.com/assets/admin/dashboard/graph1.svg",
+//       price: "150",
+//     },
+//     {
+//       type: "Email Replied",
+//       percentage: "20.92%",
+//       arrow: "https://www.tailwindtap.com/assets/admin/dashboard/downarrow.svg",
+//       graph: "https://www.tailwindtap.com/assets/admin/dashboard/graph3.svg",
+//       price: "100",
+//     },
+//   ];
 
 const TableData = [
     {
@@ -89,6 +90,20 @@ const TableData = [
 
 
 const DashboardAdmin = () => {
+  const [user, setusers] = useState([]);
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get('http://localhost:8080/users/usersList');
+        setusers(response.data); // Log the fetched data
+
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
+
+    fetchUsers();
+  }, []);
   const [openSideBar, setOpenSieBar] = useState(true);
 
   const [isActive, setIsActive] = useState(false);
@@ -104,7 +119,7 @@ const DashboardAdmin = () => {
 
   return (
     <div className="w-full py-3 pl-7 pr-5 grid xl:grid-cols-12 lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-5 justify-start">
-    {cardData?.map((data, key) => (
+    {/* {cardData?.map((data, key) => (
       <div
         className="p-5 xl:col-span-3 bg-white flex flex-col  2xl:max-w-none w-full rounded-xl gap-2 border border-[#E7E7E7] hover:shadow-xl cursor-pointer"
         key={key}
@@ -135,7 +150,7 @@ const DashboardAdmin = () => {
           <img src={data?.graph} alt="graph" />
         </div>
       </div>
-    ))}
+    ))} */}
 
     <div className="p-3 bg-white flex flex-col xl:col-span-12 xl:row-auto lg:row-start-4  rounded-xl border border-[#E7E7E7]">
       <div className="flex items-center justify-between flex-wrap gap-1">
@@ -166,6 +181,7 @@ const DashboardAdmin = () => {
             />
           </svg>
         </div>
+        <div>Total Users : {user.length}</div>
         <DropDowns list={people} />
       </div>
       <div className="w-full overflow-x-scroll md:overflow-auto  mt-1">
@@ -191,26 +207,18 @@ const DashboardAdmin = () => {
                 Email
               </th>
               <th className="py-3 text-[#212B36] text-sm font-normal whitespace-nowrap">
-                Email Sent
+                No. of clients
               </th>
-              <th className="py-3 px-2.5 text-[#212B36] text-sm font-normal whitespace-nowrap">
-               Email Opened
-              </th>
-              <th className="py-3 text-[#212B36] text-sm font-normal whitespace-nowrap">
-              Email Replied
-              </th>
-              <th className="py-3 text-[#212B36] text-sm font-normal whitespace-nowrap text-center">
-                Status
-              </th>
+     
               <th className="py-3 pl-1 text-[#212B36] text-sm font-normal whitespace-nowrap rounded-r-lg">
                 Action
               </th>
             </tr>
           </thead>
           <tbody>
-            {TableData.map((data) => (
+            {user.map((data) => (
               <tr
-                key={data.id}
+                key={data.user_id}
                 className="drop-shadow-[0_0_10px_rgba(34,46,58,0.02)] bg-[#f6f8fa] hover:shadow-2xl cursor-pointer"
               > 
                 <td className="py-4 pl-3 text-sm font-normal text-[#637381] rounded-l-lg">
@@ -226,41 +234,15 @@ const DashboardAdmin = () => {
                         </div>
                 </td>
                 <td className="py-2 px-1 text-sm font-normal text-[#637381]">
-                  {data.name}
+                  {data.user_name}
                 </td>
                 <td className="py-2 px-1 text-sm font-normal text-[#637381]">
-                  {data.email}
-                </td>
-                <td
-                  className="py-2 px-1 text-sm font-normal text-[#637381]"
-                  
-                >
-                  {data.emailsent}
-                </td>
-                <td className="py-2 px-2.5 text-sm font-normal text-[#637381]">
-                  {data.emailopened}
+                  {data.user_email}
                 </td>
                 <td className="py-2 px-1 text-sm font-normal text-[#637381]">
-                  {data.emailreplied}
+                  {data.client_count}
                 </td>
-               
-                <td className="px-6 py-2">
-          <button
-            onClick={() => toggleActive(data.id)}
-            className={`relative inline-flex items-center rounded-full border border-gray-300 w-10 h-6 transition-colors focus:outline-none ${data.isActive ? 'bg-green' : 'bg-gray'}`}
-          >
-            <span
-              className={`absolute left-0 inline-block w-5 h-5 bg-white rounded-full shadow-sm transform transition-transform ease-in-out ${
-                data.isActive ? 'translate-x-full' : 'translate-x-0'
-              }`}
-            ></span>
-            <span
-              className={`absolute inset-y-0 left-0 flex items-center justify-center w-8 h-8 rounded-full transition-transform ease-in-out transform ${
-                data.isActive ? 'translate-x-8' : 'translate-x-0'
-              }`}
-            ></span>
-          </button>
-</td>
+
                 <td className="py-4 px-1 text-sm font-normal text-[#637381] rounded-r-[8px] flex gap-3">
                   <i class="fa-solid fa-trash"></i>
                   <i class="fa-solid fa-user-pen"></i></td>

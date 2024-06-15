@@ -1,9 +1,17 @@
 import db from "../database_Config/db.js";
 
 export const addFestivals = (req,res) => {
-    const { date, name, title } = req.body;
+    const { date, name, title, userType } = req.body;
+  
 
-    const status_id = 1;
+    let status_id;
+if (userType === 'user') {
+  status_id = 1;
+} else if (userType === 'admin') {
+  status_id = 2;
+} else {
+  status_id = 1; // Or any other default value you prefer
+}
 
     const query = 'INSERT INTO festival_list (festival_name, festival_date, festival_title, status_id) VALUES (?, ?, ?, ?)';
     const values = [name, date, title, status_id];
@@ -24,7 +32,7 @@ export const addFestivals = (req,res) => {
 // fetch pending festivals request
 
 export const pendingFestivals = (req, res) => {
-  const query = 'SELECT `festival_id`, `festival_name`, `festival_date`, `festival_title`, `status_id` FROM `festival_list` WHERE `status_id` = 1';
+  const query = "SELECT `festival_id`, `festival_name`, DATE_FORMAT(`festival_date`, '%d %M, %Y') AS `festival_date`, `festival_title`, `status_id` FROM `festival_list` WHERE `status_id` = 1";
   
   db.query(query, (err, results) => {
       if (err) {
@@ -35,6 +43,7 @@ export const pendingFestivals = (req, res) => {
       }
   });
 };
+
 
 export const updateFestivalStatus = (req, res) => {
   const { festivalId, statusId } = req.body;
@@ -53,4 +62,39 @@ export const updateFestivalStatus = (req, res) => {
       res.status(200).json({ message: 'Festival status updated successfully' });
     }
   });
+};
+
+// verified festivals by admin 
+
+export const verifiedFestivals = (req, res) => {
+  const query = "SELECT `festival_id`, `festival_name`, DATE_FORMAT(`festival_date`, '%d %M, %Y') AS `festival_date`, `festival_title`  FROM `festival_list` WHERE `status_id` = 2";
+  
+  db.query(query, (err, results) => {
+      if (err) {
+          console.error('Error fetching pending festivals:', err);
+          res.status(500).json({ message: 'Failed to fetch pending festivals' });
+      } else {
+          res.status(200).json(results);
+      }
+  });
+};
+
+
+// set festival description 
+
+export const scheduleEmail = async (req, res) => {
+  const { festival_id, festival_subject, festival_message} = req.body;
+
+  try {
+    await db.query('INSERT INTO `festival_emails`(`festival_id`, `festival_subject`, `festival_message`) VALUES (?, ?, ?)', [
+      festival_id,
+      festival_subject,
+      festival_message
+    ]);
+
+    res.status(200).json({ message: 'Email scheduled successfully' });
+  } catch (error) {
+    console.error('Error scheduling email:', error);
+    res.status(500).json({ message: 'Failed to schedule email', error });
+  }
 };

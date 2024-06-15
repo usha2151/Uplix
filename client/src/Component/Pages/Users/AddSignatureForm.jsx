@@ -6,9 +6,10 @@ const AddSignatureForm = () => {
   const auth = useSelector((state) => state.auth);
   const userid = auth.id;
 
+
   const [formData, setFormData] = useState({
     name: "",
-    position: "",
+    designation: "",
     phone: "",
     email: "",
     company: "",
@@ -23,9 +24,10 @@ const AddSignatureForm = () => {
 
   useEffect(() => {
     // Fetch existing data for the user if it exists
-    axios.get(`http://localhost:8080/signature/signature/${userid}`).then((response) => {
-      if (response.data) {
+    axios.get(`http://localhost:8080/signature/getsignature/${userid}`).then((response) => {
+      if (response) {
         setFormData(response.data);
+        console.log(response.data);
       }
     });
   }, [userid]);
@@ -51,9 +53,8 @@ const AddSignatureForm = () => {
     <div className="px-16 py-8">
       <div className="w-full bg-white rounded-lg shadow-md px-8 py-6 border border-gray">
         <h2 className="text-fs4 font-semibold text-blue mb-1">
-          Add Signature{userid}
+          Add Signature
         </h2>
-        {message && <div className="text-green-500 mb-4">{message}</div>}
         <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
           <div className="mb-1">
             <label htmlFor="name" className="block font-semibold mb-1">
@@ -71,17 +72,17 @@ const AddSignatureForm = () => {
             />
           </div>
           <div className="mb-1">
-            <label htmlFor="position" className="block font-semibold mb-1">
-              Position:
+            <label htmlFor="designation" className="block font-semibold mb-1">
+              Designation:
             </label>
             <input
               type="text"
-              id="position"
-              name="position"
-              value={formData.position}
+              id="designation"
+              name="designation"
+              value={formData.designation}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray rounded-md"
-              placeholder="position"
+              placeholder="designation"
               required
             />
           </div>
@@ -214,6 +215,8 @@ const AddSignatureForm = () => {
             </button>
           </div>
         </form>
+        {message && <div className="text-green mb-4">{message}</div>}
+
       </div>
     </div>
   );
