@@ -12,6 +12,8 @@ import AddFestivalRouter from './routes/addFestivalRouter.js';
 import authRouter from './routes/authRouter.js';
 import addSignature from './routes/addSignature.js';
 import userList from './routes/userListRouter.js';
+import { checkFestivalForToday } from './controller/emailSent.js';
+import cron from 'node-cron';
 
 dotenv.config();
 
@@ -23,7 +25,7 @@ app.use(bodyParser.json());
 app.use(express.json());
 app.use(cors({
   origin: 'http://localhost:5173',
-  methods: ['POST', 'GET', 'PUT'],
+  methods: ['POST', 'GET', 'PUT', 'DELETE'],
   credentials: true,
 }));
 
@@ -41,3 +43,10 @@ app.use('/users', userList);
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
+
+
+// functions run at 8 am every day
+cron.schedule('31 22 * * *', () => {
+  checkFestivalForToday();
+  });
+  

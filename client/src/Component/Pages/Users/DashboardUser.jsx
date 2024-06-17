@@ -45,6 +45,7 @@ const DashboardUser = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [clientToDelete, setClientToDelete] = useState(null);
   const [editModalIsOpen, setEditModalIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const auth = useSelector((state) => state.auth);
   const userid = auth.id;
@@ -62,20 +63,22 @@ const DashboardUser = () => {
     fetchData();
   }, [userid]);
 
-  const toggleActive = async (id) => {
-    try {
-      const updatedClients = userClients.map((client) =>
-        client.client_id === id ? { ...client, isActive: !client.isActive } : client
-      );
-      setUserClients(updatedClients);
+const toggleActive = async (id) => {
+  try {
+    const updatedClients = userClients.map((client) =>
+      client.client_id === id ? { ...client, status: client.status === 1 ? 0 : 1 } : client
+    );
+    setUserClients(updatedClients);
 
-      await axios.put(`http://localhost:8080/userClients/updateStatus/${id}`, {
-        isActive: !userClients.find((client) => client.client_id === id).isActive,
-      });
-    } catch (error) {
-      console.error("Error toggling active status:", error);
-    }
-  };
+    await axios.put(`http://localhost:8080/userClients/updateStatus/${id}`, {
+      isActive: userClients.find((client) => client.client_id === id).status !== 1,
+    });
+
+    // fetchData(); // Refresh data after toggling
+  } catch (error) {
+    console.error("Error toggling active status:", error);
+  }
+};
   const handleEditClick = (client) => {
     setEditClientId(client.client_id);
     setEditedClient(client);
@@ -86,13 +89,17 @@ const DashboardUser = () => {
     const { name, value } = e.target;
     setEditedClient({ ...editedClient, [name]: value });
   };
-
-  const handleSaveClick = () => {
-    setUserClients((clients) =>
-      clients.map((client) => (client.client_id === editClientId ? editedClient : client))
-    );
-    setEditClientId(null);
-    setEditModalIsOpen(false);
+  const handleSaveClick = async () => {
+    try {
+      await axios.put(`http://localhost:8080/userClients/updateClient/${editClientId}`, editedClient);
+      setUserClients((clients) =>
+        clients.map((client) => (client.client_id === editClientId ? editedClient : client))
+      );
+      setEditClientId(null);
+      setEditModalIsOpen(false);
+    } catch (error) {
+      console.error("Error updating client:", error);
+    }
   };
 
   const handleDeleteClick = (client) => {
@@ -100,13 +107,18 @@ const DashboardUser = () => {
     setModalIsOpen(true);
   };
 
-  const handleConfirmDelete = () => {
-    setUserClients((clients) =>
-      clients.filter((client) => client.client_id !== clientToDelete.client_id)
-    );
-    setModalIsOpen(false);
+  const handleConfirmDelete = async () => {
+    try {
+      await axios.delete(`http://localhost:8080/userClients/deleteClient/${clientToDelete.client_id}`);
+      setUserClients((clients) =>
+        clients.filter((client) => client.client_id !== clientToDelete.client_id)
+      );
+      setModalIsOpen(false);
+      setClientToDelete(null);
+    } catch (error) {
+      console.error("Error deleting client:", error);
+    }
   };
-
   const handleCancelDelete = () => {
     setModalIsOpen(false);
     setClientToDelete(null);
@@ -152,7 +164,7 @@ const DashboardUser = () => {
             </div>
           </div>
           <div className="flex gap-4 justify-between items-center">
-            <span className="text-2xl font-bold whitespace-nowrap">{data?.price}</span>
+            <span className="text-2xl font-bold whitespace-nowrap">{userClients ? userClients.length : ''}</span>
             <img src={data?.graph} alt="graph" />
           </div>
         </div>
@@ -183,9 +195,7 @@ const DashboardUser = () => {
               />
             </svg>
           </div>
-          <div>
-              <button type="button" className="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-full border border-blue  focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">No. of Clients: {userClients.length}</button>
-              </div>
+      
           <DropDowns list={people} />
         </div>
         <div className="w-full overflow-x-scroll md:overflow-auto mt-1">
@@ -204,9 +214,7 @@ const DashboardUser = () => {
                     </label>
                   </div>
                 </th>
-                <th className="py-3 px-2.5 text-[#212B36] text-sm font-normal whitespace-nowrap">
-                  S.no
-                </th>
+        
                 <th className="py-3 pl-1 text-[#212B36] text-sm font-normal whitespace-nowrap">
                   First Name
                 </th>
@@ -245,13 +253,19 @@ const DashboardUser = () => {
             />
           </div>
         </td>
-        <td className="py-2 px-2.5 text-sm font-normal text-[#637381]">{index + 1}</td>
+      
         <td className="py-2 pl-1 text-sm font-normal text-[#637381]">
           {client.first_name}
         </td>
         <td className="py-2 text-sm font-normal text-[#637381]">{client.last_name}</td>
         <td className="py-2 text-sm font-normal text-[#637381]">{client.email}</td>
         <td className="py-2 text-sm font-normal text-[#637381] text-center">
+<button
+className={`py-2 px-4 rounded ${client.status === 1 ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}
+onClick={() => toggleActive(client.client_id)}
+>
+{client.status === 1 ? 'Active' : 'Inactive'}
+</button>
           <button
             onClick={() => toggleActive(client.client_id)}
             className={`relative inline-flex items-center rounded-full border border-gray-300 w-10 h-6 transition-colors focus:outline-none ${

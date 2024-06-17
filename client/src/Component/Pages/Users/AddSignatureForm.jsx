@@ -15,7 +15,7 @@ const AddSignatureForm = () => {
     company: "",
     street: "",
     city: "",
-    zip: "",
+    zipCode: "",
     country: "",
     website: "",
   });
@@ -162,14 +162,14 @@ const AddSignatureForm = () => {
             />
           </div>
           <div className="mb-1">
-            <label htmlFor="zip" className="block font-semibold mb-1">
+            <label htmlFor="zipCode" className="block font-semibold mb-1">
               Zip Code:
             </label>
             <input
               type="text"
-              id="zip"
-              name="zip"
-              value={formData.zip}
+              id="zipCode"
+              name="zipCode"
+              value={formData.zipCode}
               onChange={handleChange}
               placeholder="Enter zip"
               className="w-full px-3 py-2 border border-gray rounded-md"

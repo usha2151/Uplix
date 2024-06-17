@@ -126,7 +126,7 @@ function AddUsers() {
             <div key={index} className="mb-4.5">
               <div className={`mb-4.5 gap-4 xl:flex ${index === 0 ? 'mb-2' : ''}`}>
                 <div className="w-full xl:w-full">
-                  <label className="mb-2.5 block text-black dark:text-white">First name</label>
+                  {index === 0 && <label className="mb-2.5 block text-black dark:text-white">First name</label>}
                   <input
                     type="text"
                     name="firstName"
@@ -138,7 +138,7 @@ function AddUsers() {
                   {errors.users[index]?.firstName && <p className="text-red-500">{errors.users[index].firstName}</p>}
                 </div>
                 <div className="w-full xl:w-full">
-                  <label className="mb-2.5 block text-black dark:text-white">Last name</label>
+                  {index === 0 && <label className="mb-2.5 block text-black dark:text-white">Last name</label>}
                   <input
                     type="text"
                     name="lastName"
@@ -150,7 +150,7 @@ function AddUsers() {
                   {errors.users[index]?.lastName && <p className="text-red-500">{errors.users[index].lastName}</p>}
                 </div>
                 <div className="w-full xl:w-full">
-                  <label className="mb-2.5 block text-black dark:text-white">Email <span className="text-meta-1">*</span></label>
+                  {index === 0 && <label className="mb-2.5 block text-black dark:text-white">Email <span className="text-meta-1">*</span></label>}
                   <input
                     type="email"
                     name="email"
@@ -173,7 +173,7 @@ function AddUsers() {
           ))}
           <div className="mt-4 flex justify-end gap-2">
             <button type="button" onClick={handleAddUser} className="inline-flex justify-center rounded-md border border-transparent bg-green py-2 px-4 text-sm text-white font-medium bg-blue-500">
-              <i className="fa-solid fa-user-plus mr-1 mt-1"></i>Add Users
+              <i className="fa-solid fa-user-plus mr-1 mt-1"></i>More Users
             </button>
           </div>
 

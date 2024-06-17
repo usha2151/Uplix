@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import DropDowns from "../../Common/DropDowns";
 import { useDispatch, useSelector } from 'react-redux';
 import { AddFestivals, verifyFestival } from "../../../redux/actions/action";
+import axios from "axios";
 
 
 const people = [
@@ -13,7 +14,8 @@ const people = [
 const FestivalList = () => {
   const dispatch = useDispatch();
   const festivals = useSelector((state)=> state.festivalPendingReducer.pendingNotifications);
-  console.log(festivals);
+  const auth = useSelector((state) => state.auth);
+  const userId = auth.id;
 
   useEffect(()=>{
     dispatch(verifyFestival())
@@ -29,10 +31,49 @@ const FestivalList = () => {
   const [festivalDate, setFestivalDate] = useState('');
   const [festivalName, setFestivalName] = useState('');
   const [festivalTitle, setFestivalTitle] = useState('');
+  const [selectedFestivals, setSelectedFestivals] = useState([]);
 
   // Handle page change
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
+  };
+
+// fetch selected festivals by the user
+
+  useEffect(() => {
+    const fetchSelectedFestivals = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8080/festivals/getSelectedFestivals/${userId}`);
+        setSelectedFestivals(response.data.selectedFestivals);
+       
+      } catch (error) {
+        console.error('Error fetching selected festivals:', error);
+      }
+    };
+
+    fetchSelectedFestivals();
+  }, [userId]);
+  // to selected user festivals
+
+  const handleCheckboxChange = async (festivalId, isChecked) => {
+    // Update the local state
+    const updatedSelectedFestivals = isChecked
+      ? [...selectedFestivals, festivalId]
+      : selectedFestivals.filter(id => id !== festivalId);
+    setSelectedFestivals(updatedSelectedFestivals);
+
+    // Send the update to the backend
+
+    try {
+      await axios.post('http://localhost:8080/festivals/selectedFestivals', {
+        userId,
+        festivalId,
+        isSelected: isChecked,
+      });
+      console.log('Festival selection updated successfully');
+    } catch (error) {
+      console.error('Error updating festival selection:', error);
+    }
   };
 
     // Toggle form visibility
@@ -113,42 +154,52 @@ const FestivalList = () => {
           
           </div>
           <div className="w-full overflow-x-scroll md:overflow-auto mt-1">
-            <table className="table-auto overflow-scroll md:overflow-auto w-full text-left font-inter border-separate border-spacing-y-1">
-              <thead className="bg-[#222E3A]/[6%] rounded-lg text-base text-white font-semibold w-full">
-                <tr>
-                  <th className="py-3 pl-1 text-[#212B36] text-sm font-normal whitespace-nowrap">
-                    S. No
-                  </th>
-                  <th className="py-3 text-[#212B36] text-sm font-normal whitespace-nowrap">
-                    Festival Name
-                  </th>
-                  <th className="py-3 text-[#212B36] text-sm font-normal whitespace-nowrap">
-                    Festival Date
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentItems.map((data, index) => (
-                  <tr
-                    key={data.id}
-                    className="drop-shadow-[0_0_10px_rgba(34,46,58,0.02)] bg-[#f6f8fa] hover:shadow-2xl cursor-pointer"
-                  >
-                  
-                    <td className="py-4 px-1 text-sm font-normal text-[#637381]">
-                      {index+1}
-                    </td>
-                    <td className="py-4 px-1 text-sm font-normal text-[#637381]">
-                      {data.festival_name}
-                    </td>
-                    <td className="py-4 px-1 text-sm font-normal text-[#637381]">
-                      {data.festival_date}
-                    </td>
-                  
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+      <table className="table-auto overflow-scroll md:overflow-auto w-full text-left font-inter border-separate border-spacing-y-1">
+        <thead className="bg-[#222E3A]/[6%] rounded-lg text-base text-white font-semibold w-full">
+          <tr>
+            <th className="py-3 pl-1 text-[#212B36] text-sm font-normal whitespace-nowrap">
+              S. No
+            </th>
+            <th className="py-3 text-[#212B36] text-sm font-normal whitespace-nowrap">
+              Festival Name
+            </th>
+            <th className="py-3 text-[#212B36] text-sm font-normal whitespace-nowrap">
+              Festival Date
+            </th>
+            <th className="py-3 text-[#212B36] text-sm font-normal whitespace-nowrap">
+              Select Festival
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {currentItems.map((data, index) => (
+            <tr
+              key={data.festival_id}
+              className="drop-shadow-[0_0_10px_rgba(34,46,58,0.02)] bg-[#f6f8fa] hover:shadow-2xl cursor-pointer"
+            >
+              <td className="py-4 px-1 text-sm font-normal text-[#637381]">
+                {index + 1}
+              </td>
+              <td className="py-4 px-1 text-sm font-normal text-[#637381]">
+                {data.festival_name}
+              </td>
+              <td className="py-4 px-1 text-sm font-normal text-[#637381]">
+                {data.festival_date}
+              </td>
+              <td className="py-4 px-1 text-sm font-normal text-[#637381]">
+                <input
+                  type="checkbox"
+                  checked={selectedFestivals.includes(data.festival_id)}
+                  onChange={(e) =>
+                    handleCheckboxChange(data.festival_id, e.target.checked)
+                  }
+                />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
           <div className="flex gap-4 justify-center items-center mt-4">
             <button
               onClick={() => handlePageChange(currentPage - 1)}

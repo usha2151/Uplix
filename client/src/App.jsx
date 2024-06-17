@@ -11,6 +11,8 @@ import DashboardAdmin from "./Component/Pages/Admin/DashboardAdmin";
 import DashboardUser from "./Component/Pages/Users/DashboardUser";
 import SignUp from "./Component/Pages/Auth/SignUp";
 import SignIn from "./Component/Pages/Auth/SignIn";
+import RequestFestival from "./Component/Pages/Admin/RequestFestival";
+import AdminAddFestival from "./Component/Pages/Admin/AdminAddFestival";
 
 const App = () => {
   return (
@@ -46,6 +48,10 @@ const MainApp = () => {
             <Route path="/admin" element={<DashboardAdmin />} />
             <Route path="/login" element={<SignUp />} />
             <Route path="/" element={<SignIn />} />
+            <Route path="/festivals-request" element={<RequestFestival />} />
+            <Route path="/AdminaddFestival" element={<AdminAddFestival />} />
+
+
           </Routes>
         </div>
       </div>

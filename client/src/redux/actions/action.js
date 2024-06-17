@@ -5,6 +5,8 @@ export const SET_AUTH = 'SET_AUTH';
 export const USER_CLIENTS= 'USER_CLIENTS';
 export const ADD_FESTIVALS = 'ADD_FESTIVALS';
 export const FESTIVALS_VERIFIED ='FESTIVALS_VERIFIED';
+export const FESTIVALS_REQUEST ='FESTIVALS_REQUEST';
+
 
 
 // =============================== authenticate login admin ========================================//
@@ -59,6 +61,22 @@ export const verifyFestival = () => {
       const response = await axios.get('http://localhost:8080/festivals/verifyFestivals');
       dispatch({ 
         type: FESTIVALS_VERIFIED,
+         payload: response.data 
+        });
+    } catch (error) {
+      console.error('Error fetching pending notifications:', error);
+    }
+  }
+}
+
+// fetch festivals pending request
+
+export const pendingFestival = () => {
+  return async (dispatch) => {
+    try {
+      const response = await axios.get('http://localhost:8080/festivals/festival-request');
+      dispatch({ 
+        type: FESTIVALS_REQUEST,
          payload: response.data 
         });
     } catch (error) {

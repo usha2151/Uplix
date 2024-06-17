@@ -53,7 +53,7 @@ export const UserClients = (req, res) => {
         });
 
         // Prepare values for insertion
-        const values = userData.map(user => [user.userId, user.firstName, user.lastName, user.email]);
+        const values = userData.map(user => [user.userId, user.firstName, user.lastame, user.email]);
 
         // Insert user data into the database
         db.query('INSERT INTO userclients (user_id, first_name, last_name, email) VALUES ?', [values], (err, result) => {
@@ -74,11 +74,9 @@ export const UserClients = (req, res) => {
 
 // All user's client data
 export const allClients = (req, res) => {
-    const id = req.params.id; 
+    const id = req.params.id;
     console.log(id);
     console.log("hii");
-    
-
 
     const sql = `SELECT * FROM userclients WHERE user_id = ?`;
 
@@ -95,6 +93,85 @@ export const allClients = (req, res) => {
             return;
         }
         res.status(200).json({ success: true, message: 'Clients fetched successfully', clients: results });
-   console.log(results);
+        console.log(results);
+    });
+};
+
+// Update client's data
+export const editUserClients = (req, res) => {
+    const { clientId } = req.params;
+    const { first_name, last_name, email } = req.body;
+
+    const sql = `UPDATE userclients SET first_name = ?, last_name = ?, email = ? WHERE client_id = ?`;
+    const values = [first_name, last_name, email, clientId];
+
+    db.query(sql, values, (error, results) => {
+        if (error) {
+            console.error('Error updating client data:', error);
+            res.status(500).json({ success: false, message: 'Error updating client data' });
+            return;
+        }
+
+        if (results.affectedRows === 0) {
+            res.status(404).json({ success: false, message: 'Client not found' });
+            return;
+        }
+
+        res.status(200).json({ success: true, message: 'Client updated successfully' });
+    });
+};
+
+
+// edit status active or inactive
+export const editActiveorInactive = (req, res) => {
+    const { clientId } = req.params;
+    const { isActive } = req.body;
+
+    console.log(`Client ID: ${clientId}`);
+    console.log(`isActive: ${isActive}`);
+
+    // Ensure that isActive is a boolean
+    const status = isActive === true ? 1 : 0;
+
+    console.log(`Status to update: ${status}`);
+
+    const sql = `UPDATE userclients SET status = ? WHERE client_id = ?`;
+    const values = [status, clientId];
+
+    db.query(sql, values, (error, results) => {
+        if (error) {
+            console.error('Error updating client data:', error);
+            res.status(500).json({ success: false, message: 'Error updating client data' });
+            return;
+        }
+
+        if (results.affectedRows === 0) {
+            res.status(404).json({ success: false, message: 'Client not found' });
+            return;
+        }
+
+        res.status(200).json({ success: true, message: 'Client updated successfully' });
+    });
+};
+// Delete client's data
+export const deleteClientsData = (req, res) => {
+    const { clientId } = req.params;
+
+    const sql = `DELETE FROM userclients WHERE client_id = ?`;
+    const values = [clientId];
+
+    db.query(sql, values, (error, results) => {
+        if (error) {
+            console.error('Error deleting client data:', error);
+            res.status(500).json({ success: false, message: 'Error deleting client data' });
+            return;
+        }
+
+        if (results.affectedRows === 0) {
+            res.status(404).json({ success: false, message: 'Client not found' });
+            return;
+        }
+
+        res.status(200).json({ success: true, message: 'Client deleted successfully' });
     });
 };

@@ -210,9 +210,9 @@ const DashboardAdmin = () => {
                 No. of clients
               </th>
      
-              <th className="py-3 pl-1 text-[#212B36] text-sm font-normal whitespace-nowrap rounded-r-lg">
+              {/* <th className="py-3 pl-1 text-[#212B36] text-sm font-normal whitespace-nowrap rounded-r-lg">
                 Action
-              </th>
+              </th> */}
             </tr>
           </thead>
           <tbody>
@@ -243,9 +243,9 @@ const DashboardAdmin = () => {
                   {data.client_count}
                 </td>
 
-                <td className="py-4 px-1 text-sm font-normal text-[#637381] rounded-r-[8px] flex gap-3">
+                {/* <td className="py-4 px-1 text-sm font-normal text-[#637381] rounded-r-[8px] flex gap-3">
                   <i class="fa-solid fa-trash"></i>
-                  <i class="fa-solid fa-user-pen"></i></td>
+                  <i class="fa-solid fa-user-pen"></i></td> */}
 
 
               </tr>
