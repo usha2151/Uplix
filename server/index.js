@@ -46,7 +46,7 @@ app.listen(port, () => {
 
 
 // functions run at 8 am every day
-cron.schedule('31 22 * * *', () => {
+cron.schedule('34 21 * * *', () => {
   checkFestivalForToday();
   });
   

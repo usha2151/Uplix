@@ -45,7 +45,7 @@ const DashboardUser = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [clientToDelete, setClientToDelete] = useState(null);
   const [editModalIsOpen, setEditModalIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
 
   const auth = useSelector((state) => state.auth);
   const userid = auth.id;
@@ -129,23 +129,20 @@ const toggleActive = async (id) => {
     setEditClientId(null);
   };
 
-  const handleSearch = (searchTerm) => {
-    if (!searchTerm.trim()) {
-      setUserClients(userClients); // Reset to original list if search is empty
-      return;
-    }
-    const filteredClients = userClients.filter((client) =>
-      client.first_name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setUserClients(filteredClients);
+  const handleSearch = (event) => {
+    setSearchQuery(event.target.value);
   };
-  
+
+  const filteredUsers = userClients.filter(user => 
+    user.first_name && user.first_name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
 
   // Pagination logic
   const indexOfLastClient = currentPage * clientsPerPage;
   const indexOfFirstClient = indexOfLastClient - clientsPerPage;
-  const currentClients = userClients.slice(indexOfFirstClient, indexOfLastClient);
-  const totalPages = Math.ceil(userClients.length / clientsPerPage);
+  const currentClients = filteredUsers.slice(indexOfFirstClient, indexOfLastClient);
+  const totalPages = Math.ceil(filteredUsers.length / clientsPerPage);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -173,7 +170,7 @@ const toggleActive = async (id) => {
       <div className="p-3 bg-white flex flex-col xl:col-span-12 xl:row-auto lg:row-start-4 rounded-xl border border-[#E7E7E7]">
         <div className="flex items-center justify-between flex-wrap gap-1">
           <div className="lg:max-w-sm w-2/5 lg:w-full border focus-within:border-blue-600 rounded-lg border-[#E7E7E7] py-1 px-4 justify-between items-center max-h-12 hidden md:flex">
-            <input type="text" onChange={(e) => handleSearch(e.target.value)} className="outline-none w-9/12" placeholder="Search..." />
+            <input type="text"  value={searchQuery} onChange={handleSearch} className="outline-none w-9/12" placeholder="Search..." />
             <svg
               width="15"
               height="15"

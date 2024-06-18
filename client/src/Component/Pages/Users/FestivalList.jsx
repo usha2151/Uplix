@@ -13,9 +13,23 @@ const people = [
 
 const FestivalList = () => {
   const dispatch = useDispatch();
+  const [searchQuery, setSearchQuery] = useState('');
   const festivals = useSelector((state)=> state.festivalPendingReducer.pendingNotifications);
   const auth = useSelector((state) => state.auth);
   const userId = auth.id;
+
+  const handleSearch = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const filteredUsers = festivals.filter(user => {
+    const query = searchQuery.toLowerCase();
+    return (
+      (user.festival_name && user.festival_name.toLowerCase().includes(query)) ||
+      (user.festival?.festival_name && user.festival_name.toLowerCase().includes(query)) ||
+      (user.festival?.festival_date && user.festival_date.toLowerCase().includes(query))
+    );
+  });
 
   useEffect(()=>{
     dispatch(verifyFestival())
@@ -26,7 +40,7 @@ const FestivalList = () => {
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = festivals.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
   const [showModel, setModel] = useState(false); // State to manage form visibility
   const [festivalDate, setFestivalDate] = useState('');
   const [festivalName, setFestivalName] = useState('');
@@ -46,6 +60,7 @@ const FestivalList = () => {
         const response = await axios.get(`http://localhost:8080/festivals/getSelectedFestivals/${userId}`);
         setSelectedFestivals(response.data.selectedFestivals);
        
+       
       } catch (error) {
         console.error('Error fetching selected festivals:', error);
       }
@@ -53,6 +68,8 @@ const FestivalList = () => {
 
     fetchSelectedFestivals();
   }, [userId]);
+
+
   // to selected user festivals
 
   const handleCheckboxChange = async (festivalId, isChecked) => {
@@ -120,6 +137,8 @@ const FestivalList = () => {
                 type="text"
                 className="outline-none w-9/12"
                 placeholder="Search..."
+                value={searchQuery}
+        onChange={handleSearch}
               />
               <svg
                 width="15"

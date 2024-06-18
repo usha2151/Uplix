@@ -91,11 +91,13 @@ const TableData = [
 
 const DashboardAdmin = () => {
   const [user, setusers] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         const response = await axios.get('http://localhost:8080/users/usersList');
         setusers(response.data); // Log the fetched data
+        console.log(response.data);
 
       } catch (error) {
         console.error('Error fetching users:', error);
@@ -104,6 +106,12 @@ const DashboardAdmin = () => {
 
     fetchUsers();
   }, []);
+  const handleSearch = (event) => {
+    setSearchQuery(event.target.value);
+  };
+  const filteredUsers = user.filter(user => 
+    user.user_name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
   const [openSideBar, setOpenSieBar] = useState(true);
 
   const [isActive, setIsActive] = useState(false);
@@ -159,6 +167,8 @@ const DashboardAdmin = () => {
             type="text"
             className="outline-none w-9/12"
             placeholder="Search..."
+            value={searchQuery}
+            onChange={handleSearch}
           />
           <svg
             width="15"
@@ -216,22 +226,23 @@ const DashboardAdmin = () => {
             </tr>
           </thead>
           <tbody>
-            {user.map((data) => (
+          {filteredUsers.length > 0 ? (
+            filteredUsers.map((data) => (
               <tr
                 key={data.user_id}
                 className="drop-shadow-[0_0_10px_rgba(34,46,58,0.02)] bg-[#f6f8fa] hover:shadow-2xl cursor-pointer"
               > 
                 <td className="py-4 pl-3 text-sm font-normal text-[#637381] rounded-l-lg">
-                <div class="flex items-center">
-                          <input
-                            id="checkbox-all-search"
-                            type="checkbox"
-                            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                          />
-                          <label for="checkbox-all-search" class="sr-only">
-                            checkbox
-                          </label>
-                        </div>
+                  <div className="flex items-center">
+                    <input
+                      id="checkbox-all-search"
+                      type="checkbox"
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                    />
+                    <label htmlFor="checkbox-all-search" className="sr-only">
+                      checkbox
+                    </label>
+                  </div>
                 </td>
                 <td className="py-2 px-1 text-sm font-normal text-[#637381]">
                   {data.user_name}
@@ -242,15 +253,16 @@ const DashboardAdmin = () => {
                 <td className="py-2 px-1 text-sm font-normal text-[#637381]">
                   {data.client_count}
                 </td>
-
-                {/* <td className="py-4 px-1 text-sm font-normal text-[#637381] rounded-r-[8px] flex gap-3">
-                  <i class="fa-solid fa-trash"></i>
-                  <i class="fa-solid fa-user-pen"></i></td> */}
-
-
               </tr>
-            ))}
-          </tbody>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="4" className="py-4 pl-3 text-center text-sm font-normal text-[#637381]">
+                No records found
+              </td>
+            </tr>
+          )}
+        </tbody>
         </table>
       </div>
     </div>
