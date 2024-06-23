@@ -205,7 +205,7 @@ export const Login = (req, res) => {
             const id = user.id_auth;
             const name = user.name;
             const token = jwt.sign({ id, name }, process.env.JWT_SECRET_KEY, { expiresIn: '1d' });
-            console.log("Generated Token:", token);
+            // console.log("Generated Token:", token);
             res.cookie('token', token, { 
               httpOnly: true, 
               secure: process.env.NODE_ENV === 'production',
@@ -230,7 +230,7 @@ export const Login = (req, res) => {
 
 export const verifyJwt = (req, res, next) => {
   const token = req.cookies.token;
-  console.log("Token from cookies:", token);
+//   console.log("Token from cookies:", token);
 
   if (!token) {
     console.log("No token provided.");

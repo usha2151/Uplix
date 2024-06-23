@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-
+import { serverUrl } from "./serverUrl";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const navigationList = [
   {
     name: "Dashboard",
-    path:"/user",
-    pathname:"dashboard",
+    path: "/user",
+    pathname: "dashboard",
     svg: (
       <svg
         width="18"
@@ -28,48 +30,44 @@ const navigationList = [
           d="M6 9C6 8.58579 6.33579 8.25 6.75 8.25H11.25C11.6642 8.25 12 8.58579 12 9V16.5C12 16.9142 11.6642 17.25 11.25 17.25C10.8358 17.25 10.5 16.9142 10.5 16.5V9.75H7.5V16.5C7.5 16.9142 7.16421 17.25 6.75 17.25C6.33579 17.25 6 16.9142 6 16.5V9Z"
         />
       </svg>
-      
     ),
-  
   },
   {
     name: "Add Users",
-    path:"/add-users",
-    pathname:"Add users",
-    svg: (
-      <i class="fa-solid fa-user-pen"></i>
-    ),
+    path: "/add-users",
+    pathname: "Add users",
+    svg: <i class="fa-solid fa-user-pen"></i>,
   },
   {
     name: "Add Emails",
-    path:"/add-email",
-    pathname:"addemails",
+    path: "/add-email",
+    pathname: "addemails",
     svg: (
       <svg
-      width="18"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="group-hover:fill-blue-600 fill-[#637381]"
-    >
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M4 5C3.45228 5 3 5.45228 3 6V18C3 18.5477 3.45228 19 4 19H20C20.5477 19 21 18.5477 21 18V6C21 5.45228 20.5477 5 20 5H4ZM1 6C1 4.34772 2.34772 3 4 3H20C21.6523 3 23 4.34772 23 6V18C23 19.6523 21.6523 21 20 21H4C2.34772 21 1 19.6523 1 18V6Z"
-      />
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M1.18085 5.42656C1.49757 4.97411 2.1211 4.86408 2.57355 5.18079L12.0001 11.7794L21.4266 5.18079C21.8791 4.86408 22.5026 4.97411 22.8193 5.42656C23.136 5.87901 23.026 6.50254 22.5735 6.81926L12.5735 13.8193C12.2292 14.0603 11.7709 14.0603 11.4266 13.8193L1.42662 6.81926C0.974174 6.50254 0.864139 5.87901 1.18085 5.42656Z"
-      />
-    </svg>
+        width="18"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="group-hover:fill-blue-600 fill-[#637381]"
+      >
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M4 5C3.45228 5 3 5.45228 3 6V18C3 18.5477 3.45228 19 4 19H20C20.5477 19 21 18.5477 21 18V6C21 5.45228 20.5477 5 20 5H4ZM1 6C1 4.34772 2.34772 3 4 3H20C21.6523 3 23 4.34772 23 6V18C23 19.6523 21.6523 21 20 21H4C2.34772 21 1 19.6523 1 18V6Z"
+        />
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M1.18085 5.42656C1.49757 4.97411 2.1211 4.86408 2.57355 5.18079L12.0001 11.7794L21.4266 5.18079C21.8791 4.86408 22.5026 4.97411 22.8193 5.42656C23.136 5.87901 23.026 6.50254 22.5735 6.81926L12.5735 13.8193C12.2292 14.0603 11.7709 14.0603 11.4266 13.8193L1.42662 6.81926C0.974174 6.50254 0.864139 5.87901 1.18085 5.42656Z"
+        />
+      </svg>
     ),
   },
   {
     name: "View Signature",
-    path:"/view-signature",
-    pathname:"viewsignature",
+    path: "/view-signature",
+    pathname: "viewsignature",
     svg: (
       <svg
         width="18"
@@ -96,12 +94,11 @@ const navigationList = [
         />
       </svg>
     ),
-
   },
   {
     name: "Add festival",
-    path:"/fest-list",
-    pathname:"fest-list",
+    path: "/fest-list",
+    pathname: "fest-list",
     svg: (
       <svg
         width="18"
@@ -134,36 +131,14 @@ const navigationList = [
       </svg>
     ),
   },
-  {
-    name: "Users",
-    path:"/admin",
-    pathname:"admin",
-    svg: (
-      <svg
-        width="19"
-        height="17"
-        viewBox="0 0 19 17"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="group-hover:fill-[#4F80E1] fill-[#637381]"
-      >
-        <path
-          d="M13.8763 11.2356C14.2831 10.9579 14.7602 10.8009 15.2524 10.783C15.7447 10.765 16.232 10.8868 16.6579 11.1343C17.0838 11.3817 17.431 11.7447 17.6592 12.1812C17.8874 12.6177 17.9874 13.1099 17.9476 13.6009C16.9043 13.9655 15.7961 14.1074 14.6946 14.0174C14.6912 13.0318 14.4074 12.0667 13.8763 11.2365C13.4049 10.4972 12.7547 9.88872 11.9857 9.46739C11.2168 9.04606 10.354 8.82548 9.47718 8.82608C8.60052 8.82563 7.7379 9.04627 6.96912 9.4676C6.20034 9.88892 5.55023 10.4973 5.07892 11.2365M14.6937 14.0165L14.6946 14.0435C14.6946 14.2391 14.6841 14.4322 14.6624 14.6226C13.0844 15.5279 11.2964 16.0029 9.47718 16C7.59022 16 5.81892 15.4991 4.29197 14.6226C4.26961 14.4214 4.25887 14.219 4.25979 14.0165M4.25979 14.0165C3.1586 14.1098 2.05102 13.9684 1.00849 13.6017C0.968796 13.1109 1.06883 12.6189 1.29704 12.1825C1.52524 11.7461 1.87229 11.3833 2.29806 11.1359C2.72382 10.8885 3.21092 10.7666 3.70303 10.7845C4.19513 10.8023 4.67215 10.959 5.07892 11.2365M4.25979 14.0165C4.26292 13.0311 4.54816 12.0668 5.07892 11.2365M12.0859 3.60869C12.0859 4.30056 11.811 4.96409 11.3218 5.45332C10.8326 5.94254 10.169 6.21739 9.47718 6.21739C8.78531 6.21739 8.12178 5.94254 7.63255 5.45332C7.14333 4.96409 6.86849 4.30056 6.86849 3.60869C6.86849 2.91682 7.14333 2.25329 7.63255 1.76407C8.12178 1.27484 8.78531 1 9.47718 1C10.169 1 10.8326 1.27484 11.3218 1.76407C11.811 2.25329 12.0859 2.91682 12.0859 3.60869ZM17.3033 6.21739C17.3033 6.47432 17.2527 6.72874 17.1543 6.96612C17.056 7.20349 16.9119 7.41918 16.7302 7.60086C16.5485 7.78253 16.3328 7.92665 16.0955 8.02498C15.8581 8.1233 15.6037 8.17391 15.3467 8.17391C15.0898 8.17391 14.8354 8.1233 14.598 8.02498C14.3606 7.92665 14.145 7.78253 13.9633 7.60086C13.7816 7.41918 13.6375 7.20349 13.5392 6.96612C13.4408 6.72874 13.3902 6.47432 13.3902 6.21739C13.3902 5.69849 13.5964 5.20084 13.9633 4.83392C14.3302 4.467 14.8278 4.26087 15.3467 4.26087C15.8656 4.26087 16.3633 4.467 16.7302 4.83392C17.0971 5.20084 17.3033 5.69849 17.3033 6.21739ZM5.56414 6.21739C5.56414 6.47432 5.51353 6.72874 5.41521 6.96612C5.31688 7.20349 5.17277 7.41918 4.99109 7.60086C4.80941 7.78253 4.59372 7.92665 4.35635 8.02498C4.11897 8.1233 3.86455 8.17391 3.60762 8.17391C3.35069 8.17391 3.09627 8.1233 2.85889 8.02498C2.62152 7.92665 2.40583 7.78253 2.22415 7.60086C2.04247 7.41918 1.89835 7.20349 1.80003 6.96612C1.70171 6.72874 1.6511 6.47432 1.6511 6.21739C1.6511 5.69849 1.85723 5.20084 2.22415 4.83392C2.59107 4.467 3.08872 4.26087 3.60762 4.26087C4.12652 4.26087 4.62417 4.467 4.99109 4.83392C5.35801 5.20084 5.56414 5.69849 5.56414 6.21739Z"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
 
-  },
 ];
 
 const footerNavigation = [
   {
     name: "Settings",
-    path:"/setting",
-    pathname:"Settings",
+    path: "/setting",
+    pathname: "Settings",
     svg: (
       <svg
         width="18"
@@ -193,43 +168,17 @@ const footerNavigation = [
       </svg>
     ),
   },
-  {
-    name: "Log out",
-    svg: (
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 18 18"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="group-hover:fill-[#4F80E1] fill-[#637381]"
-      >
-        <path
-          fillRule="evenodd"
-          clipRule="evenodd"
-          d="M3.75 3C3.55109 3 3.36032 3.07902 3.21967 3.21967C3.07902 3.36032 3 3.55109 3 3.75V14.25C3 14.4489 3.07902 14.6397 3.21967 14.7803C3.36032 14.921 3.55109 15 3.75 15H6.75C7.16421 15 7.5 15.3358 7.5 15.75C7.5 16.1642 7.16421 16.5 6.75 16.5H3.75C3.15326 16.5 2.58097 16.2629 2.15901 15.841C1.73705 15.419 1.5 14.8467 1.5 14.25V3.75C1.5 3.15326 1.73705 2.58097 2.15901 2.15901C2.58097 1.73705 3.15326 1.5 3.75 1.5H6.75C7.16421 1.5 7.5 1.83579 7.5 2.25C7.5 2.66421 7.16421 3 6.75 3H3.75Z"
-        />
-        <path
-          d="M12 12.75L15.75 9L12 5.25"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          fillRule="evenodd"
-          clipRule="evenodd"
-          d="M6 9C6 8.58579 6.33579 8.25 6.75 8.25H15.75C16.1642 8.25 16.5 8.58579 16.5 9C16.5 9.41421 16.1642 9.75 15.75 9.75H6.75C6.33579 9.75 6 9.41421 6 9Z"
-        />
-      </svg>
-    ),
-  },
 ];
 const Sidebar = () => {
-
   const [showMenu, setShowMenu] = useState(false);
   const [openSideBar, setOpenSieBar] = useState(true);
-  const dispatch = useDispatch();
+
+  const navigate = useNavigate();
+
   const auth = useSelector((state) => state.auth);
+
+  const role = auth?.role;
+
   const changeSideBar = () => {
     setOpenSieBar(!openSideBar);
   };
@@ -238,155 +187,249 @@ const Sidebar = () => {
   };
 
   const [route, setRoute] = useState("dashboard");
-  const [show,setShow]=useState(false)
+
+  const handleLogout = () => {
+    axios
+      .get(`${serverUrl}/auth/logout`)
+      .then(() => window.location.reload(), navigate("/login"))
+      .catch((err) => console.log(err));
+  };
+
+  
+
   return (
     <div
-          className={`transition-all duration-1000 ease-in-out z-50 bg-white sm:relative sm:flex sm:flex-col gap-2 sm:gap-16 rounded-br-xl h-screen min-h-[600px] py-6 absolute top-0 sm:left-0 ${
-            showMenu
-              ? "left-0 h-screen overflow-y-auto px-5"
-              : "-left-72 sm:left-0"
-          } ${openSideBar ? "w-72 px-5" : "w-72 sm:w-24"} overflow-hidden`}
+      className={`transition-all duration-1000 ease-in-out z-50 bg-white sm:relative sm:flex sm:flex-col gap-2 sm:gap-16 rounded-br-xl h-screen min-h-[600px] py-6 absolute top-0 sm:left-0 ${
+        showMenu ? "left-0 h-screen overflow-y-auto px-5" : "-left-72 sm:left-0"
+      } ${openSideBar ? "w-72 px-5" : "w-72 sm:w-24"} overflow-hidden`}
+    >
+      <div
+        className={`transition-all duration-500 delay-700 ease-in-out flex gap-2 justify-start items-center ${
+          openSideBar ? "sm:justify-start" : "sm:justify-center"
+        }  cursor-pointer relative z-30`}
+      >
+        <img
+          src={"https://www.tailwindtap.com/assets/admin/dashboard/logo.svg"}
+          className="z-30"
+          alt="logo"
+        />
+        <span
+          className={`text-xl font-semibold ${
+            openSideBar ? " block" : "block sm:hidden"
+          } `}
         >
-          <div
-            className={`transition-all duration-500 delay-700 ease-in-out flex gap-2 justify-start items-center ${
-              openSideBar ? "sm:justify-start" : "sm:justify-center"
-            }  cursor-pointer relative z-30`}
+          Uplix Digital
+        </span>
+        <img
+          src={"https://www.tailwindtap.com/assets/admin/dashboard/close.svg"}
+          alt="close"
+          className={`h-7 cursor-pointer sm:hidden left-5 relative ${
+            showMenu ? "block " : "hidden"
+          }`}
+          onClick={showMenuItems}
+        />
+        <div
+          className={`h-10  w-10 rounded-full bg-white absolute top-0  sm:flex justify-center items-center cursor-pointer hidden ${
+            openSideBar ? "rotate-[180deg] -right-3" : "rotate-0 -right-3"
+          }`}
+          onClick={changeSideBar}
+        >
+          <svg
+            className="w-8 h-8 rotate-[180deg]"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
-            <img
-              src={
-                "https://www.tailwindtap.com/assets/admin/dashboard/logo.svg"
-              }
-              className="z-30"
-              alt="logo"
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M15 19l-7-7 7-7"
             />
-            <span
-              className={`text-xl font-semibold ${
-                openSideBar ? " block" : "block sm:hidden"
+          </svg>
+        </div>
+      </div>
+      <div className="flex flex-col gap-2.5 sm:justify-between h-full mt-10 sm:mt-0">
+        <div className="md:max-w-[234px]">
+        {role === 'user' && navigationList?.map((data, index) => (
+            <Link
+              to={data?.path}
+              onClick={() => setRoute(`${data?.pathname}`)}
+              className={` ${
+                route == "addblog" ? " bg-dark text-white " : "text-darkgray"
               } `}
             >
-              Uplix Digital
-            </span>
-            <img
-              src={"https://www.tailwindtap.com/assets/admin/dashboard/close.svg"}
-              alt="close"
-              className={`h-7 cursor-pointer sm:hidden left-5 relative ${
-                showMenu ? "block " : "hidden"
-              }`}
-              onClick={showMenuItems}
-            />
-            <div
-              className={`h-10  w-10 rounded-full bg-white absolute top-0  sm:flex justify-center items-center cursor-pointer hidden ${
-                openSideBar ? "rotate-[180deg] -right-3" : "rotate-0 -right-3"
-              }`}
-              onClick={changeSideBar}
-            >
-              <svg
-                className="w-8 h-8 rotate-[180deg]"
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+              <div
+                key={index}
+                className={`flex gap-2.5 items-center cursor-pointer py-2 group hover:bg-[#4F80E1]/[12%] group rounded-md overflow-hidden ${
+                  openSideBar
+                    ? " pl-5 justify-start flex-row"
+                    : "pl-5 sm:pl-0 justify-start sm:justify-center sm:flex-col"
+                } `}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </div>
-          </div>
-          <div className="flex flex-col gap-2.5 sm:justify-between h-full mt-10 sm:mt-0">
-            <div className="md:max-w-[234px]">
-              {navigationList?.map((data, index) => (
-                 <Link
-                 to={data?.path}
-                 onClick={() => setRoute(`${data?.pathname}`)}
-                 className={` ${
-                   route == "addblog" ? " bg-dark text-white " : "text-darkgray"
-                 } `}
-               >
-                <div
-                  key={index}
-                  className={`flex gap-2.5 items-center cursor-pointer py-2 group hover:bg-[#4F80E1]/[12%] group rounded-md overflow-hidden ${
-                    openSideBar
-                      ? " pl-5 justify-start flex-row"
-                      : "pl-5 sm:pl-0 justify-start sm:justify-center sm:flex-col"
-                  } `}
-                >
-                  <div>{data?.svg}</div>
-                  <span
-                    className={`font-medium text-base group-hover:text-[#4F80E1] text-[#637381]  
+                <div>{data?.svg}</div>
+                <span
+                  className={`font-medium text-base group-hover:text-[#4F80E1] text-[#637381]  
                      ${
                        openSideBar
                          ? " block"
                          : "block sm:hidden group-hover:block sm:group-hover:text-xs"
                      }`}
+                >
+                  {data?.name}
+                </span>
+              </div>
+            </Link>
+           ))}
+ {role === 'admin' && (
+            <Link
+              to={"/admin"}
+              onClick={() => setRoute(`admin`)}
+              className={` ${
+                route == "addblog" ? " bg-dark text-white " : "text-darkgray"
+              } `}
+            >
+              <div
+                
+                className={`flex gap-2.5 items-center cursor-pointer py-2 group hover:bg-[#4F80E1]/[12%] group rounded-md overflow-hidden ${
+                  openSideBar
+                    ? " pl-5 justify-start flex-row"
+                    : "pl-5 sm:pl-0 justify-start sm:justify-center sm:flex-col"
+                } `}
+              >
+                <div> <svg
+        width="19"
+        height="17"
+        viewBox="0 0 19 17"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="group-hover:fill-[#4F80E1] fill-[#637381]"
+      >
+        <path
+          d="M13.8763 11.2356C14.2831 10.9579 14.7602 10.8009 15.2524 10.783C15.7447 10.765 16.232 10.8868 16.6579 11.1343C17.0838 11.3817 17.431 11.7447 17.6592 12.1812C17.8874 12.6177 17.9874 13.1099 17.9476 13.6009C16.9043 13.9655 15.7961 14.1074 14.6946 14.0174C14.6912 13.0318 14.4074 12.0667 13.8763 11.2365C13.4049 10.4972 12.7547 9.88872 11.9857 9.46739C11.2168 9.04606 10.354 8.82548 9.47718 8.82608C8.60052 8.82563 7.7379 9.04627 6.96912 9.4676C6.20034 9.88892 5.55023 10.4973 5.07892 11.2365M14.6937 14.0165L14.6946 14.0435C14.6946 14.2391 14.6841 14.4322 14.6624 14.6226C13.0844 15.5279 11.2964 16.0029 9.47718 16C7.59022 16 5.81892 15.4991 4.29197 14.6226C4.26961 14.4214 4.25887 14.219 4.25979 14.0165M4.25979 14.0165C3.1586 14.1098 2.05102 13.9684 1.00849 13.6017C0.968796 13.1109 1.06883 12.6189 1.29704 12.1825C1.52524 11.7461 1.87229 11.3833 2.29806 11.1359C2.72382 10.8885 3.21092 10.7666 3.70303 10.7845C4.19513 10.8023 4.67215 10.959 5.07892 11.2365M4.25979 14.0165C4.26292 13.0311 4.54816 12.0668 5.07892 11.2365M12.0859 3.60869C12.0859 4.30056 11.811 4.96409 11.3218 5.45332C10.8326 5.94254 10.169 6.21739 9.47718 6.21739C8.78531 6.21739 8.12178 5.94254 7.63255 5.45332C7.14333 4.96409 6.86849 4.30056 6.86849 3.60869C6.86849 2.91682 7.14333 2.25329 7.63255 1.76407C8.12178 1.27484 8.78531 1 9.47718 1C10.169 1 10.8326 1.27484 11.3218 1.76407C11.811 2.25329 12.0859 2.91682 12.0859 3.60869ZM17.3033 6.21739C17.3033 6.47432 17.2527 6.72874 17.1543 6.96612C17.056 7.20349 16.9119 7.41918 16.7302 7.60086C16.5485 7.78253 16.3328 7.92665 16.0955 8.02498C15.8581 8.1233 15.6037 8.17391 15.3467 8.17391C15.0898 8.17391 14.8354 8.1233 14.598 8.02498C14.3606 7.92665 14.145 7.78253 13.9633 7.60086C13.7816 7.41918 13.6375 7.20349 13.5392 6.96612C13.4408 6.72874 13.3902 6.47432 13.3902 6.21739C13.3902 5.69849 13.5964 5.20084 13.9633 4.83392C14.3302 4.467 14.8278 4.26087 15.3467 4.26087C15.8656 4.26087 16.3633 4.467 16.7302 4.83392C17.0971 5.20084 17.3033 5.69849 17.3033 6.21739ZM5.56414 6.21739C5.56414 6.47432 5.51353 6.72874 5.41521 6.96612C5.31688 7.20349 5.17277 7.41918 4.99109 7.60086C4.80941 7.78253 4.59372 7.92665 4.35635 8.02498C4.11897 8.1233 3.86455 8.17391 3.60762 8.17391C3.35069 8.17391 3.09627 8.1233 2.85889 8.02498C2.62152 7.92665 2.40583 7.78253 2.22415 7.60086C2.04247 7.41918 1.89835 7.20349 1.80003 6.96612C1.70171 6.72874 1.6511 6.47432 1.6511 6.21739C1.6511 5.69849 1.85723 5.20084 2.22415 4.83392C2.59107 4.467 3.08872 4.26087 3.60762 4.26087C4.12652 4.26087 4.62417 4.467 4.99109 4.83392C5.35801 5.20084 5.56414 5.69849 5.56414 6.21739Z"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg></div>
+                <span
+                  className={`font-medium text-base group-hover:text-[#4F80E1] text-[#637381]  
+                     ${
+                       openSideBar
+                         ? " block"
+                         : "block sm:hidden group-hover:block sm:group-hover:text-xs"
+                     }`}
+                >
+                  Users
+                </span>
+              </div>
+            </Link>
+ )}
+        </div>
+        <div className="flex flex-col gap-5">
+          <div className="max-w-[234px]">
+            {footerNavigation?.map((data, index) => (
+              <Link
+                to={data?.path}
+                onClick={() => setRoute(`${data?.pathname}`)}
+                className={` ${
+                  route == "addblog" ? " bg-dark text-white " : "text-darkgray"
+                } `}
+              >
+                <div
+                  className={`flex gap-2.5 items-center cursor-pointer py-2 rounded-md hover:bg-[#4F80E1]/[12%] group ${
+                    openSideBar
+                      ? " pl-5 justify-start flex-row"
+                      : "pl-5 sm:pl-0 justify-start sm:justify-center sm:flex-col"
+                  }`}
+                  key={index}
+                >
+                  {data?.svg}
+                  <span
+                    className={`font-medium text-base group-hover:text-[#4F80E1] text-[#637381] ${
+                      openSideBar
+                        ? " block"
+                        : "block sm:hidden group-hover:block sm:group-hover:text-xs"
+                    }`}
                   >
                     {data?.name}
                   </span>
                 </div>
-                </Link>
-              ))}
-            </div>
-            <div className="flex flex-col gap-5">
-              <div className="max-w-[234px]">
-                {footerNavigation?.map((data, index) => (
-                   <Link
-                   to={data?.path}
-                   onClick={() => setRoute(`${data?.pathname}`)}
-                   className={` ${
-                     route == "addblog" ? " bg-dark text-white " : "text-darkgray"
-                   } `}>
-                  <div
-                    className={`flex gap-2.5 items-center cursor-pointer py-2 rounded-md hover:bg-[#4F80E1]/[12%] group ${
-                      openSideBar
-                        ? " pl-5 justify-start flex-row"
-                        : "pl-5 sm:pl-0 justify-start sm:justify-center sm:flex-col"
-                    }`}
-                    key={index}
-                  >
-                    {data?.svg}
-                    <span
-                      className={`font-medium text-base group-hover:text-[#4F80E1] text-[#637381] ${
-                        openSideBar
-                          ? " block"
-                          : "block sm:hidden group-hover:block sm:group-hover:text-xs"
-                      }`}
-                    >
-                      {data?.name}
-                    </span>
-                  </div>
-                </Link>
-                ))}
-              </div>
-              <div
-                className={`flex gap-3
-                 ${openSideBar ? "justify-start pl-5" : "justify-center"} `}
+              </Link>
+            ))}
+
+            <div
+              className={`flex gap-2.5 items-center cursor-pointer py-2 rounded-md hover:bg-[#4F80E1]/[12%] group ${
+                openSideBar
+                  ? " pl-5 justify-start flex-row"
+                  : "pl-5 sm:pl-0 justify-start sm:justify-center sm:flex-col"
+              }`}
+              onClick={handleLogout}
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 18 18"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="group-hover:fill-[#4F80E1] fill-[#637381]"
               >
-                <img
-                  src="https://www.tailwindtap.com/assets/admin/dashboard/user1.svg"
-                  alt="user"
-                  className={`hidden sm:block ${
-                    openSideBar ? "h-10 w-10" : "justify-center"
-                  }`}
+                <path
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  d="M3.75 3C3.55109 3 3.36032 3.07902 3.21967 3.21967C3.07902 3.36032 3 3.55109 3 3.75V14.25C3 14.4489 3.07902 14.6397 3.21967 14.7803C3.36032 14.921 3.55109 15 3.75 15H6.75C7.16421 15 7.5 15.3358 7.5 15.75C7.5 16.1642 7.16421 16.5 6.75 16.5H3.75C3.15326 16.5 2.58097 16.2629 2.15901 15.841C1.73705 15.419 1.5 14.8467 1.5 14.25V3.75C1.5 3.15326 1.73705 2.58097 2.15901 2.15901C2.58097 1.73705 3.15326 1.5 3.75 1.5H6.75C7.16421 1.5 7.5 1.83579 7.5 2.25C7.5 2.66421 7.16421 3 6.75 3H3.75Z"
                 />
-                <div className={`${openSideBar ? "block" : "hidden"}`}>
-                  <div className="flex flex-col pr-1">
-                    <span className="text-[#637381] text-sm xl:text-base font-medium truncate w-full max-w-20 cursor-pointer">
-                      {auth.name}
-                    </span>
-                    <span className="text-[#637381] text-xs xl:text-sm font-normal truncate w-full max-w-20 cursor-pointer">
-                    {auth.email}
-                    </span>
-                  </div>
-                </div>
+                <path
+                  d="M12 12.75L15.75 9L12 5.25"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  d="M6 9C6 8.58579 6.33579 8.25 6.75 8.25H15.75C16.1642 8.25 16.5 8.58579 16.5 9C16.5 9.41421 16.1642 9.75 15.75 9.75H6.75C6.33579 9.75 6 9.41421 6 9Z"
+                />
+              </svg>
+              <span
+                className={`font-medium text-base group-hover:text-[#4F80E1] text-[#637381] ${
+                  openSideBar
+                    ? " block"
+                    : "block sm:hidden group-hover:block sm:group-hover:text-xs"
+                }`}
+              >
+                Log Out
+              </span>
+            </div>
+          </div>
+          <div
+            className={`flex gap-3
+                 ${openSideBar ? "justify-start pl-5" : "justify-center"} `}
+          >
+            <img
+              src="https://www.tailwindtap.com/assets/admin/dashboard/user1.svg"
+              alt="user"
+              className={`hidden sm:block ${
+                openSideBar ? "h-10 w-10" : "justify-center"
+              }`}
+            />
+            <div className={`${openSideBar ? "block" : "hidden"}`}>
+              <div className="flex flex-col pr-1">
+                <span className="text-[#637381] text-sm xl:text-base font-medium truncate w-full max-w-20 cursor-pointer">
+                  {auth.name}
+                </span>
+                <span className="text-[#637381] text-xs xl:text-sm font-normal truncate w-full max-w-20 cursor-pointer">
+                  {auth.email}
+                </span>
               </div>
             </div>
           </div>
         </div>
+      </div>
+    </div>
   );
 };
 

@@ -1,134 +1,25 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import DropDowns from "../../Common/DropDowns";
+import { useDispatch, useSelector } from 'react-redux';
+import { AddFestivals, verifyFestival } from "../../../redux/actions/action";
+import axios from "axios";
 
-const TableData = [
-  // (Same as your data array)
+const cardData = [
   {
-    id: 1,
-    month: "January",
-    fest: "New Year's Day",
-    date: "1 January, 2024",
+    type: "Total festivals",
+    percentage: "50.43%",
+    arrow: "https://www.tailwindtap.com/assets/admin/dashboard/uparrow.svg",
+    graph: "https://www.tailwindtap.com/assets/admin/dashboard/graph1.svg",
+    price: "329",
   },
   {
-    id: 2,
-    month: "January",
-    fest: "Makar Sankranti",
-    date: "14 January, 2024",
+    type: "Festivals Sents",
+    percentage: "12.32%",
+    arrow: "https://www.tailwindtap.com/assets/admin/dashboard/uparrow.svg",
+    graph: "https://www.tailwindtap.com/assets/admin/dashboard/graph1.svg",
+    price: "200",
   },
-  {
-    id: 3,
-    month: "January",
-    fest: "Republic Day",
-    date: "26 January, 2024",
-  },
-  {
-    id: 4,
-    month: "February",
-    fest: "Vasant Panchami",
-    date: "14 February, 2024",
-  },
-  {
-    id: 5,
-    month: "March",
-    fest: "Holi",
-    date: "25 March, 2024",
-  },
-  {
-    id: 6,
-    month: "April",
-    fest: "Ram Navami",
-    date: "17 April, 2024",
-  },
-  {
-    id: 7,
-    month: "April",
-    fest: "Mahavir Jayanti",
-    date: "21 April, 2024",
-  },
-  {
-    id: 8,
-    month: "April",
-    fest: "Good Friday",
-    date: "26 April, 2024",
-  },
-  {
-    id: 9,
-    month: "May",
-    fest: "Eid al-Fitr",
-    date: "23 May, 2024",
-  },
-  {
-    id: 10,
-    month: "June",
-    fest: "Ganga Dussehra",
-    date: "15 June, 2024",
-  },
-  {
-    id: 11,
-    month: "July",
-    fest: "Rath Yatra",
-    date: "8 July, 2024",
-  },
-  {
-    id: 12,
-    month: "July",
-    fest: "Eid al-Adha",
-    date: "28 July, 2024",
-  },
-  {
-    id: 13,
-    month: "August",
-    fest: "Raksha Bandhan",
-    date: "19 August, 2024",
-  },
-  {
-    id: 14,
-    month: "August",
-    fest: "Independence Day",
-    date: "15 August, 2024",
-  },
-  {
-    id: 15,
-    month: "August",
-    fest: "Janmashtami",
-    date: "26 August, 2024",
-  },
-  {
-    id: 16,
-    month: "September",
-    fest: "Ganesh Chaturthi",
-    date: "7 September, 2024",
-  },
-  {
-    id: 17,
-    month: "October",
-    fest: "Gandhi Jayanti",
-    date: "2 October, 2024",
-  },
-  {
-    id: 18,
-    month: "October",
-    fest: "Dussehra",
-    date: "13 October, 2024",
-  },
-  {
-    id: 19,
-    month: "October",
-    fest: "Diwali",
-    date: "31 October, 2024",
-  },
-  {
-    id: 20,
-    month: "November",
-    fest: "Guru Nanak Jayanti",
-    date: "15 November, 2024",
-  },
-  {
-    id: 21,
-    month: "December",
-    fest: "Christmas",
-    date: "25 December, 2024",
-  },
+  
 ];
 
 const people = [
@@ -138,24 +29,146 @@ const people = [
 ];
 
 const FestivalList = () => {
+  const dispatch = useDispatch();
+  const [searchQuery, setSearchQuery] = useState('');
+  const festivals = useSelector((state)=> state.festivalPendingReducer.pendingNotifications);
+  const auth = useSelector((state) => state.auth);
+  const userId = auth.id;
+
+  const handleSearch = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const filteredUsers = festivals.filter(user => {
+    const query = searchQuery.toLowerCase();
+    return (
+      (user.festival_name && user.festival_name.toLowerCase().includes(query)) ||
+      (user.festival?.festival_name && user.festival_name.toLowerCase().includes(query)) ||
+      (user.festival?.festival_date && user.festival_date.toLowerCase().includes(query))
+    );
+  });
+
+  useEffect(()=>{
+    dispatch(verifyFestival())
+  },[dispatch]);
+
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = TableData.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
+  const [showModel, setModel] = useState(false); // State to manage form visibility
+  const [festivalDate, setFestivalDate] = useState('');
+  const [festivalName, setFestivalName] = useState('');
+  const [festivalTitle, setFestivalTitle] = useState('');
+  const [selectedFestivals, setSelectedFestivals] = useState([]);
 
   // Handle page change
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
 
+// fetch selected festivals by the user
+
+  useEffect(() => {
+    const fetchSelectedFestivals = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8080/festivals/getSelectedFestivals/${userId}`);
+        setSelectedFestivals(response.data.selectedFestivals);
+       
+       
+      } catch (error) {
+        console.error('Error fetching selected festivals:', error);
+      }
+    };
+
+    fetchSelectedFestivals();
+  }, [userId]);
+
+
+  // to selected user festivals
+
+  const handleCheckboxChange = async (festivalId, isChecked) => {
+    // Update the local state
+    const updatedSelectedFestivals = isChecked
+      ? [...selectedFestivals, festivalId]
+      : selectedFestivals.filter(id => id !== festivalId);
+    setSelectedFestivals(updatedSelectedFestivals);
+
+    // Send the update to the backend
+
+    try {
+      await axios.post('http://localhost:8080/festivals/selectedFestivals', {
+        userId,
+        festivalId,
+        isSelected: isChecked,
+      });
+      console.log('Festival selection updated successfully');
+    } catch (error) {
+      console.error('Error updating festival selection:', error);
+    }
+  };
+
+    // Toggle form visibility
+    const toggleForm = () => {
+      setModel(!showModel);
+    };
+
+    const handleAddFestival = async (event) => {
+      event.preventDefault();
+    
+      // Check for duplicate festival name
+      const isDuplicateName = festivals.some(festival => festival.name === festivalName);
+    
+      if (isDuplicateName) {
+        alert('Festival name already exists. Please add a new Festival.');
+        return;
+      }
+  
+      const festivalData = {
+          date: festivalDate,
+          name: festivalName,
+          title: festivalTitle
+        };
+    
+      dispatch(AddFestivals(festivalData, 'user'));
+  
+      // Reset input fields after dispatching the action
+      setFestivalName('');
+      setFestivalDate('');
+      setFestivalTitle('');
+      setModel(false);
+    };
+
   // Calculate the total number of pages
-  const totalPages = Math.ceil(TableData.length / itemsPerPage);
+  const totalPages = Math.ceil(festivals.length / itemsPerPage);
 
   return (
     <>
       <div className="w-full py-3 pl-7 pr-5 grid xl:grid-cols-12 lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-5 justify-start">
+      
+      {cardData?.map((data, key) => (
+        <div
+          className="p-5 xl:col-span-3 bg-white flex flex-col 2xl:max-w-none w-full rounded-xl gap-2 border border-[#E7E7E7] hover:shadow-xl cursor-pointer"
+          key={key}
+        >
+          <div className="flex justify-between">
+            <span className="text-[#637381] text-sm font-medium">{data?.type}</span>
+            <div className="flex gap-1 items-center">
+              <span className="">{data?.percentage}</span>
+              <img src={data?.arrow} alt="arrow" />
+            </div>
+          </div>
+          <div className="flex gap-4 justify-between items-center">
+            <span className="text-2xl font-bold whitespace-nowrap">{festivals.length}</span>
+            <img src={data?.graph} alt="graph" />
+          </div>
+        </div>
+      ))}
+
+      
+      
         <div className="p-3 bg-white flex flex-col xl:col-span-12 xl:row-auto lg:row-start-4 rounded-xl border border-[#E7E7E7]">
           <div className="flex items-center justify-between flex-wrap gap-1">
             <div className="lg:max-w-sm w-2/5 lg:w-full border focus-within:border-blue-600 rounded-lg border-[#E7E7E7] py-1 px-4 justify-between items-center max-h-12 hidden md:flex">
@@ -163,6 +176,8 @@ const FestivalList = () => {
                 type="text"
                 className="outline-none w-9/12"
                 placeholder="Search..."
+                value={searchQuery}
+        onChange={handleSearch}
               />
               <svg
                 width="15"
@@ -186,7 +201,8 @@ const FestivalList = () => {
               </svg>
             </div>
             <div className="flex flex-wrap gap-4">
-            <button className="px-4  text-base font-semibold text-white bg-blue rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2">
+             
+            <button onClick={toggleForm}  className="px-4  text-base font-semibold text-white bg-blue rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2">
               Add Festivals
             </button>
             <DropDowns list={people} />
@@ -194,71 +210,52 @@ const FestivalList = () => {
           
           </div>
           <div className="w-full overflow-x-scroll md:overflow-auto mt-1">
-            <table className="table-auto overflow-scroll md:overflow-auto w-full text-left font-inter border-separate border-spacing-y-1">
-              <thead className="bg-[#222E3A]/[6%] rounded-lg text-base text-white font-semibold w-full">
-                <tr>
-                  <th className="py-3 pl-3 text-[#212B36] text-sm font-normal whitespace-nowrap rounded-l-lg">
-                    <div className="flex items-center">
-                      <input
-                        id="checkbox-all-search"
-                        type="checkbox"
-                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                      />
-                      <label htmlFor="checkbox-all-search" className="sr-only">
-                        checkbox
-                      </label>
-                    </div>
-                  </th>
-                  <th className="py-3 pl-1 text-[#212B36] text-sm font-normal whitespace-nowrap">
-                    Month
-                  </th>
-                  <th className="py-3 text-[#212B36] text-sm font-normal whitespace-nowrap">
-                    Festivals
-                  </th>
-                  <th className="py-3 text-[#212B36] text-sm font-normal whitespace-nowrap">
-                    Date
-                  </th>
-                  <th className="py-3 pl-1 text-[#212B36] text-sm font-normal whitespace-nowrap rounded-r-lg">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentItems.map((data) => (
-                  <tr
-                    key={data.id}
-                    className="drop-shadow-[0_0_10px_rgba(34,46,58,0.02)] bg-[#f6f8fa] hover:shadow-2xl cursor-pointer"
-                  >
-                    <td className="py-4 pl-3 text-sm font-normal text-[#637381] rounded-l-lg">
-                      <div className="flex items-center">
-                        <input
-                          id={`checkbox-${data.id}`}
-                          type="checkbox"
-                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                        />
-                        <label htmlFor={`checkbox-${data.id}`} className="sr-only">
-                          checkbox
-                        </label>
-                      </div>
-                    </td>
-                    <td className="py-4 px-1 text-sm font-normal text-[#637381]">
-                      {data.month}
-                    </td>
-                    <td className="py-4 px-1 text-sm font-normal text-[#637381]">
-                      {data.fest}
-                    </td>
-                    <td className="py-4 px-2.5 text-sm font-normal text-[#637381]">
-                      {data.date}
-                    </td>
-                    <td className="py-4 px-1 text-sm font-normal text-[#637381] rounded-r-[8px] flex gap-3">
-                      <i class="fa-regular fa-pen-to-square"></i>
-                      <i class="fa-regular fa-trash-can"></i>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+      <table className="table-auto overflow-scroll md:overflow-auto w-full text-left font-inter border-separate border-spacing-y-1">
+        <thead className="bg-[#222E3A]/[6%] rounded-lg text-base text-white font-semibold w-full">
+          <tr>
+            <th className="py-3 pl-1 text-[#212B36] text-sm font-normal whitespace-nowrap">
+              S. No
+            </th>
+            <th className="py-3 text-[#212B36] text-sm font-normal whitespace-nowrap">
+              Festival Name
+            </th>
+            <th className="py-3 text-[#212B36] text-sm font-normal whitespace-nowrap">
+              Festival Date
+            </th>
+            <th className="py-3 text-[#212B36] text-sm font-normal whitespace-nowrap">
+              Select Festival
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {currentItems.map((data, index) => (
+            <tr
+              key={data.festival_id}
+              className="drop-shadow-[0_0_10px_rgba(34,46,58,0.02)] bg-[#f6f8fa] hover:shadow-2xl cursor-pointer"
+            >
+              <td className="py-4 px-1 text-sm font-normal text-[#637381]">
+                {index + 1}
+              </td>
+              <td className="py-4 px-1 text-sm font-normal text-[#637381]">
+                {data.festival_name}
+              </td>
+              <td className="py-4 px-1 text-sm font-normal text-[#637381]">
+                {data.festival_date}
+              </td>
+              <td className="py-4 px-1 text-sm font-normal text-[#637381]">
+                <input
+                  type="checkbox"
+                  checked={selectedFestivals.includes(data.festival_id)}
+                  onChange={(e) =>
+                    handleCheckboxChange(data.festival_id, e.target.checked)
+                  }
+                />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
           <div className="flex gap-4 justify-center items-center mt-4">
             <button
               onClick={() => handlePageChange(currentPage - 1)}
@@ -279,6 +276,61 @@ const FestivalList = () => {
             </button>
           </div>
         </div>
+              {/* Show Model to add festival */}
+      {showModel && (
+        <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-dark bg-opacity-50 z-50">
+          <div className="bg-white p-5 rounded-lg relative" style={{ width: '50vw', maxWidth: '350px', height: 'auto', padding: '20px' }}>
+            {/* Close Icon */}
+            <button className="absolute top-0 right-0 mt-2 mr-2 text-gray-400 hover:text-gray-600" onClick={toggleForm}>
+              <i className="fa-solid fa-xmark"></i>
+            </button>
+
+            {/* Form */}
+            <form onSubmit={handleAddFestival}>
+            <div className="mb-4.5">
+          <label className="block text-black dark:text-white mb-2">Date of Festival</label>
+          <input
+            type="date"
+            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            required
+            value={festivalDate}
+            onChange={(e) => setFestivalDate(e.target.value)}
+          />
+        </div>
+
+        <div className="mb-4.5">
+          <label className="block text-black dark:text-white mb-2 mt-2">Festival Name</label>
+          <input
+            type="text"
+            placeholder="Enter Festival Name"
+            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            required
+            value={festivalName}
+            onChange={(e) => setFestivalName(e.target.value)}
+          />
+        </div>
+        
+        <div className="mb-4.5">
+          <label className="block text-black dark:text-white mb-2 mt-2">Festival Title</label>
+          <input
+            type="text"
+            placeholder="Enter Festival Title"
+            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-2 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            required
+            value={festivalTitle}
+            onChange={(e) => setFestivalTitle(e.target.value)}
+          />
+        </div>
+
+              <div className="mt-4 flex justify-end">
+                <button type="submit" className="flex-shrink-0 px-4 py-2 text-base font-semibold text-white bg-blue rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2">
+                  Add Festival
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       </div>
     </>
   );

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function SignUp() {
   const [formData, setFormData] = useState({
@@ -8,6 +9,7 @@ function SignUp() {
     role: 'user' // Default role set to 'user'
   });
 
+  const navigate = useNavigate();
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -34,6 +36,7 @@ function SignUp() {
       if (response.ok) {
         // Handle successful signup
         console.log('User signed up successfully');
+        navigate("/login")
       } else {
         // Handle signup error
         console.error('Signup failed');

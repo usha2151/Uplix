@@ -1,10 +1,11 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { Listbox, Transition } from "@headlessui/react";
 import DropDowns from "../../Common/DropDowns";
+import axios from 'axios';
 
 const cardData = [
     {
-      type: "Clients",
+      type: "Users",
       percentage: "50.43%",
       arrow: "https://www.tailwindtap.com/assets/admin/dashboard/uparrow.svg",
       graph: "https://www.tailwindtap.com/assets/admin/dashboard/graph1.svg",
@@ -33,53 +34,7 @@ const cardData = [
     },
   ];
 
-const TableData = [
-    {
-      id: 1,
-      isActive: true,
-      name: 'Boby Swaroop',
-      email: 'boby@gmail.com',
-      emailsent:"30%",
-      emailopened:"20%",
-      emailreplied:"6",
-    },
-    {
-      id: 2,
-      isActive: true,
-      name: 'Usha Singh', 
-      email: 'usha22@gmail.com',
-      emailsent:"40%",
-      emailopened:"25%",
-      emailreplied:"8",
-    },
-    {
-      id: 2,
-      isActive: true,
-      name: 'Aftab Alam', 
-      email: 'aftab@gmail.com',
-      emailsent:"60%",
-      emailopened:"30%",
-      emailreplied:"15",
-    },
-    {
-      id: 3,
-      isActive: true,
-      name: 'Shobhit Kumar', 
-      email: 'sk@gmail.com',
-      emailsent:"50%",
-      emailopened:"28%",
-      emailreplied:"12",
-    },
-    {
-      id: 4,
-      isActive: true,
-      name: 'Shivang Mishra', 
-      email: 'shivang@gmail.com',
-      emailsent:"60%",
-      emailopened:"40%",
-      emailreplied:"56",
-    },
-  ];
+
 
   const people = [
     { name: "All " },
@@ -89,19 +44,31 @@ const TableData = [
 
 
 const DashboardAdmin = () => {
-  const [openSideBar, setOpenSieBar] = useState(true);
+  const [user, setusers] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get('http://localhost:8080/users/usersList');
+        setusers(response.data); // Log the fetched data
+        console.log(response.data);
 
-  const [isActive, setIsActive] = useState(false);
-
-    const toggleActive = (id) => {
-      setClients(TableData => TableData.map(client => {
-        if (client.id === id) {
-          return { ...client, isActive: !client.isActive };
-        }
-        return client;
-      }));
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
     };
 
+    fetchUsers();
+  }, []);
+  const handleSearch = (event) => {
+    setSearchQuery(event.target.value);
+  };
+  const filteredUsers = user.filter(user => 
+    user.user_name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  const [openSideBar, setOpenSieBar] = useState(true);
+
+ 
   return (
     <div className="w-full py-3 pl-7 pr-5 grid xl:grid-cols-12 lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-5 justify-start">
     {cardData?.map((data, key) => (
@@ -118,7 +85,7 @@ const DashboardAdmin = () => {
             {data?.type}
           </span>
           <div className="flex gap-1 items-center">
-            <span className="">{data?.percentage}</span>
+            <span className="">{data?.percentage} </span>
             <img src={data?.arrow} alt="graph" />
           </div>
         </div>
@@ -130,7 +97,7 @@ const DashboardAdmin = () => {
           }`}
         >
           <span className="text-2xl font-bold whitespace-nowrap">
-            {data?.price}
+           {user.length}
           </span>
           <img src={data?.graph} alt="graph" />
         </div>
@@ -144,6 +111,8 @@ const DashboardAdmin = () => {
             type="text"
             className="outline-none w-9/12"
             placeholder="Search..."
+            value={searchQuery}
+            onChange={handleSearch}
           />
           <svg
             width="15"
@@ -166,6 +135,7 @@ const DashboardAdmin = () => {
             />
           </svg>
         </div>
+        <div>Total Users : {user.length}</div>
         <DropDowns list={people} />
       </div>
       <div className="w-full overflow-x-scroll md:overflow-auto  mt-1">
@@ -191,84 +161,52 @@ const DashboardAdmin = () => {
                 Email
               </th>
               <th className="py-3 text-[#212B36] text-sm font-normal whitespace-nowrap">
-                Email Sent
+                No. of clients
               </th>
-              <th className="py-3 px-2.5 text-[#212B36] text-sm font-normal whitespace-nowrap">
-               Email Opened
-              </th>
-              <th className="py-3 text-[#212B36] text-sm font-normal whitespace-nowrap">
-              Email Replied
-              </th>
-              <th className="py-3 text-[#212B36] text-sm font-normal whitespace-nowrap text-center">
-                Status
-              </th>
-              <th className="py-3 pl-1 text-[#212B36] text-sm font-normal whitespace-nowrap rounded-r-lg">
+     
+              {/* <th className="py-3 pl-1 text-[#212B36] text-sm font-normal whitespace-nowrap rounded-r-lg">
                 Action
-              </th>
+              </th> */}
             </tr>
           </thead>
           <tbody>
-            {TableData.map((data) => (
+          {filteredUsers.length > 0 ? (
+            filteredUsers.map((data) => (
               <tr
-                key={data.id}
+                key={data.user_id}
                 className="drop-shadow-[0_0_10px_rgba(34,46,58,0.02)] bg-[#f6f8fa] hover:shadow-2xl cursor-pointer"
               > 
                 <td className="py-4 pl-3 text-sm font-normal text-[#637381] rounded-l-lg">
-                <div class="flex items-center">
-                          <input
-                            id="checkbox-all-search"
-                            type="checkbox"
-                            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                          />
-                          <label for="checkbox-all-search" class="sr-only">
-                            checkbox
-                          </label>
-                        </div>
+                  <div className="flex items-center">
+                    <input
+                      id="checkbox-all-search"
+                      type="checkbox"
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                    />
+                    <label htmlFor="checkbox-all-search" className="sr-only">
+                      checkbox
+                    </label>
+                  </div>
                 </td>
                 <td className="py-2 px-1 text-sm font-normal text-[#637381]">
-                  {data.name}
+                  {data.user_name}
                 </td>
                 <td className="py-2 px-1 text-sm font-normal text-[#637381]">
-                  {data.email}
-                </td>
-                <td
-                  className="py-2 px-1 text-sm font-normal text-[#637381]"
-                  
-                >
-                  {data.emailsent}
-                </td>
-                <td className="py-2 px-2.5 text-sm font-normal text-[#637381]">
-                  {data.emailopened}
+                  {data.user_email}
                 </td>
                 <td className="py-2 px-1 text-sm font-normal text-[#637381]">
-                  {data.emailreplied}
+                  {data.client_count}
                 </td>
-               
-                <td className="px-6 py-2">
-          <button
-            onClick={() => toggleActive(data.id)}
-            className={`relative inline-flex items-center rounded-full border border-gray-300 w-10 h-6 transition-colors focus:outline-none ${data.isActive ? 'bg-green' : 'bg-gray'}`}
-          >
-            <span
-              className={`absolute left-0 inline-block w-5 h-5 bg-white rounded-full shadow-sm transform transition-transform ease-in-out ${
-                data.isActive ? 'translate-x-full' : 'translate-x-0'
-              }`}
-            ></span>
-            <span
-              className={`absolute inset-y-0 left-0 flex items-center justify-center w-8 h-8 rounded-full transition-transform ease-in-out transform ${
-                data.isActive ? 'translate-x-8' : 'translate-x-0'
-              }`}
-            ></span>
-          </button>
-</td>
-                <td className="py-4 px-1 text-sm font-normal text-[#637381] rounded-r-[8px] flex gap-3">
-                  <i class="fa-solid fa-trash"></i>
-                  <i class="fa-solid fa-user-pen"></i></td>
-
-
               </tr>
-            ))}
-          </tbody>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="4" className="py-4 pl-3 text-center text-sm font-normal text-[#637381]">
+                No records found
+              </td>
+            </tr>
+          )}
+        </tbody>
         </table>
       </div>
     </div>

@@ -3,6 +3,7 @@ import {  useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import { setAuth } from "../../redux/actions/action";
+import { pendingFestival } from "../../redux/actions/action";
 
 const Navbar = () => {
   const [showMenu, setShowMenu] = useState(false);
@@ -10,7 +11,12 @@ const Navbar = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const auth = useSelector((state) => state.auth);
+  const totalfestivalRequest =useSelector(state => state.festivalRequestReducer.pendingNotifications)
 console.log(auth.name)
+
+useEffect(() => {
+dispatch(pendingFestival())
+},[dispatch])
 
   useEffect(() => {
     axios.defaults.withCredentials = true;
@@ -74,7 +80,7 @@ console.log(auth.name)
     </div>
     <div className="hidden sm:flex gap-4">
       
-      <div className="w-12 h-12 rounded-full flex items-center justify-center border border-[#E7E7E7] relative cursor-pointer group">
+      <div onClick={() => {navigate('/festivals-request')}} className="w-12 h-12 rounded-full flex items-center justify-center border border-[#E7E7E7] relative cursor-pointer group">
         <svg
           width="24"
           height="24"
@@ -95,7 +101,7 @@ console.log(auth.name)
           />
         </svg>
         <div className="w-5 h-5 rounded-full bg-[#4F80E1] absolute -top-2.5 -right-1.5 text-white text-center text-xs font-medium flex justify-center items-center">
-          4
+          {totalfestivalRequest.length}
         </div>
       </div>
       <div className="w-12 h-12 bg-[#F6F8FA] rounded-full flex items-center justify-center border border-[#E7E7E7] cursor-pointer group">

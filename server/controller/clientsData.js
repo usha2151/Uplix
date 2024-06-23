@@ -1,10 +1,10 @@
 import db from "../database_Config/db.js";
 import xlsx from 'node-xlsx';
 
-
 export const UserClients = (req, res) => {
+    console.log(req.body);
     if (req.file && req.body.userId) {
-        console.log(req.body.userId[0]);
+        console.log(req.body.userId);
         const workbook = xlsx.parse(req.file.buffer);
         // Assuming the first sheet contains the data
         const sheet = workbook[0].data;
@@ -18,15 +18,18 @@ export const UserClients = (req, res) => {
             });
             return client;
         });
-        
+
         // Add userId to each client data object
         clientsData.forEach(client => {
             client.userId = req.body.userId[0];
         });
         console.log(clientsData);
 
+        // Prepare values for insertion
+        const values = clientsData.map(client => [client.userId, client.firstName, client.lastName, client.email]);
+
         // Insert clients data into the database
-        db.query('INSERT INTO userclients (user_id, first_name, last_name, email) VALUES ?', [clientsData.map(client => [client.userId, client.firstName, client.lastName, client.email])], (err, result) => {
+        db.query('INSERT INTO userclients (user_id, first_name, last_name, email) VALUES ?', [values], (err, result) => {
             if (err) {
                 console.error('Error inserting data into database:', err);
                 res.status(500).json({ success: false, message: 'Error inserting data into database' });
@@ -36,7 +39,7 @@ export const UserClients = (req, res) => {
             }
         });
     }
-    else if (req.body.userData && req.body.userId){
+    else if (req.body.userData && req.body.userId) {
         const userData = JSON.parse(req.body.userData);
 
         if (!Array.isArray(userData)) {
@@ -44,14 +47,15 @@ export const UserClients = (req, res) => {
             return res.status(400).json({ success: false, message: 'userData must be an array of user objects' });
         }
 
-        // add user_id into clints Data
-        userData.forEach((client) =>{
-            client.userId = req.body.userId;
-        })
+        // Add userId to each user data object
+        userData.forEach(user => {
+            user.userId = req.body.userId;
+        });
+
+        // Prepare values for insertion
+        const values = userData.map(user => [user.userId, user.firstName, user.lastame, user.email]);
 
         // Insert user data into the database
-        const values = userData.map(user => [user.userId, user.firstName, user.lastName, user.email]);
-
         db.query('INSERT INTO userclients (user_id, first_name, last_name, email) VALUES ?', [values], (err, result) => {
             if (err) {
                 console.error('Error inserting data into database:', err);
@@ -69,9 +73,10 @@ export const UserClients = (req, res) => {
 };
 
 // All user's client data
-
 export const allClients = (req, res) => {
-    const  id  = 3; // Assuming ID is sent from the client-side
+    const id = req.params.id;
+    console.log(id);
+    console.log("hii");
 
     const sql = `SELECT * FROM userclients WHERE user_id = ?`;
 
@@ -88,5 +93,85 @@ export const allClients = (req, res) => {
             return;
         }
         res.status(200).json({ success: true, message: 'Clients fetched successfully', clients: results });
+        console.log(results);
+    });
+};
+
+// Update client's data
+export const editUserClients = (req, res) => {
+    const { clientId } = req.params;
+    const { first_name, last_name, email } = req.body;
+
+    const sql = `UPDATE userclients SET first_name = ?, last_name = ?, email = ? WHERE client_id = ?`;
+    const values = [first_name, last_name, email, clientId];
+
+    db.query(sql, values, (error, results) => {
+        if (error) {
+            console.error('Error updating client data:', error);
+            res.status(500).json({ success: false, message: 'Error updating client data' });
+            return;
+        }
+
+        if (results.affectedRows === 0) {
+            res.status(404).json({ success: false, message: 'Client not found' });
+            return;
+        }
+
+        res.status(200).json({ success: true, message: 'Client updated successfully' });
+    });
+};
+
+
+// edit status active or inactive
+export const editActiveorInactive = (req, res) => {
+    const { clientId } = req.params;
+    const { isActive } = req.body;
+
+    console.log(`Client ID: ${clientId}`);
+    console.log(`isActive: ${isActive}`);
+
+    // Ensure that isActive is a boolean
+    const status = isActive === true ? 1 : 0;
+
+    console.log(`Status to update: ${status}`);
+
+    const sql = `UPDATE userclients SET status = ? WHERE client_id = ?`;
+    const values = [status, clientId];
+
+    db.query(sql, values, (error, results) => {
+        if (error) {
+            console.error('Error updating client data:', error);
+            res.status(500).json({ success: false, message: 'Error updating client data' });
+            return;
+        }
+
+        if (results.affectedRows === 0) {
+            res.status(404).json({ success: false, message: 'Client not found' });
+            return;
+        }
+
+        res.status(200).json({ success: true, message: 'Client updated successfully' });
+    });
+};
+// Delete client's data
+export const deleteClientsData = (req, res) => {
+    const { clientId } = req.params;
+
+    const sql = `DELETE FROM userclients WHERE client_id = ?`;
+    const values = [clientId];
+
+    db.query(sql, values, (error, results) => {
+        if (error) {
+            console.error('Error deleting client data:', error);
+            res.status(500).json({ success: false, message: 'Error deleting client data' });
+            return;
+        }
+
+        if (results.affectedRows === 0) {
+            res.status(404).json({ success: false, message: 'Client not found' });
+            return;
+        }
+
+        res.status(200).json({ success: true, message: 'Client deleted successfully' });
     });
 };
