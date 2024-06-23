@@ -46,6 +46,8 @@ const DashboardUser = () => {
   const [clientToDelete, setClientToDelete] = useState(null);
   const [editModalIsOpen, setEditModalIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterUsers, setFilteredUsers] = useState(userClients);
+
 
   const auth = useSelector((state) => state.auth);
   const userid = auth.id;
@@ -62,6 +64,22 @@ const DashboardUser = () => {
     };
     fetchData();
   }, [userid]);
+
+  // filterd active users
+
+  const handleSelect = (selectedValue) => {
+    if(selectedValue === 'All') {
+      setUserClients(userClients);
+      alert(selectedValue);
+    } else if (selectedValue === 'Active') {
+      setUserClients(userClients.filter(user => user.status == 1));
+      alert(selectedValue);
+
+    } else if (selectedValue === "Inactive") {
+      alert(selectedValue);
+      setUserClients(userClients.filter(user => user.status == 0));
+    }
+  };
 
 const toggleActive = async (id) => {
   try {
@@ -193,7 +211,7 @@ const toggleActive = async (id) => {
             </svg>
           </div>
       
-          <DropDowns list={people} />
+          <DropDowns list={people} onSelect={handleSelect} />
         </div>
         <div className="w-full overflow-x-scroll md:overflow-auto mt-1">
           <table className="table-auto overflow-scroll md:overflow-auto w-full text-left font-inter border-separate border-spacing-y-1">

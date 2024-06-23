@@ -2,7 +2,7 @@ import db from "../database_Config/db.js";
 import xlsx from 'node-xlsx';
 
 export const UserClients = (req, res) => {
-    console.log(req.body);
+
     if (req.file && req.body.userId) {
         console.log(req.body.userId);
         const workbook = xlsx.parse(req.file.buffer);
@@ -53,7 +53,7 @@ export const UserClients = (req, res) => {
         });
 
         // Prepare values for insertion
-        const values = userData.map(user => [user.userId, user.firstName, user.lastame, user.email]);
+        const values = userData.map(user => [user.userId, user.firstName, user.lastName, user.email]);
 
         // Insert user data into the database
         db.query('INSERT INTO userclients (user_id, first_name, last_name, email) VALUES ?', [values], (err, result) => {
